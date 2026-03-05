@@ -40,10 +40,11 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
     private var menuX = 0
     private var menuY = 0
     private var menuWidth = 260
-    private var menuHeight = 205 // さらにコンパクトに短縮
+    private var menuHeight = 180 
     
     private var scrollOffset = 0
     private val actionRowHeight = 25
+    private var isDraggingScrollbar = false
 
     init {
         originalAction?.let {
@@ -56,7 +57,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
 
     override fun init() {
         menuX = (width - menuWidth) / 2
-        menuY = (height - menuHeight) / 2
+        menuY = (height - (menuHeight + 40)) / 2 + 10
 
         // Name
         nameEditBox = EditBox(font, menuX + 100, menuY + 15, 140, 20, Component.empty())
@@ -95,14 +96,15 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
 
         rebuildActionList()
 
-        // Bottom buttons - 座標をさらに上に詰める
+        // Footer buttons
+        val footerY = menuY + menuHeight + 10
         addRenderableWidget(Button.builder(Component.translatable("menu.editor.button.finish")) {
             saveAndClose()
-        }.pos(menuX + 40, menuY + menuHeight - 25).size(80, 20).build())
+        }.pos(menuX + 40, footerY).size(80, 20).build())
 
         addRenderableWidget(Button.builder(Component.translatable("menu.editor.button.cancel")) {
             onClose()
-        }.pos(menuX + 140, menuY + menuHeight - 25).size(80, 20).build())
+        }.pos(menuX + 140, footerY).size(80, 20).build())
     }
 
     private fun rebuildActionList() {
@@ -110,7 +112,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
         val maxVisibleHeight = 50 
         
         children().filterIsInstance<AbstractWidget>().filter { 
-            it.y >= listStartY && it.y < menuY + menuHeight - 25 
+            it.y >= listStartY && it.y < menuY + menuHeight 
         }.forEach { removeWidget(it) }
         
         actionButtonData.actions.forEachIndexed { index, action ->
@@ -118,7 +120,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
             
             if (rowY >= listStartY && rowY + 20 <= listStartY + maxVisibleHeight) {
                 if (action is CommandActionData) {
-                    val cmdBox = EditBox(font, menuX + 10, rowY, 200, 20, Component.empty())
+                    val cmdBox = EditBox(font, menuX + 10, rowY, 190, 20, Component.empty())
                     cmdBox.value = action.command
                     cmdBox.setResponder { actionButtonData.actions[index] = CommandActionData(it) }
                     addRenderableWidget(cmdBox)
@@ -132,14 +134,14 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                             rebuildWidgets()
                         }
                         minecraft?.setScreen(picker)
-                    }.pos(menuX + 10, rowY).size(200, 20).build()
+                    }.pos(menuX + 10, rowY).size(190, 20).build()
                     addRenderableWidget(kbBtn)
                 }
 
                 addRenderableWidget(Button.builder(Component.literal("-")) {
                     actionButtonData.actions.removeAt(index)
                     rebuildWidgets()
-                }.pos(menuX + 215, rowY).size(20, 20).build())
+                }.pos(menuX + 205, rowY).size(20, 20).build())
             }
         }
 
@@ -156,6 +158,59 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                 minecraft?.setScreen(picker)
             }.pos(menuX + 10, addActionY).size(80, 20).build())
         }
+    }
+
+    private fun isMouseOverScrollbar(mouseX: Double, mouseY: Double): Boolean {
+        val totalHeight = (actionButtonData.actions.size + 1) * actionRowHeight
+        if (totalHeight <= 50) return false
+        val sbX = menuX + menuWidth - 8
+        val sbY = menuY + 121
+        return mouseX >= sbX && mouseX <= sbX + 4 && mouseY >= sbY && mouseY <= sbY + 54
+    }
+
+    private fun updateScrollFromMouse(mouseY: Double) {
+        val totalHeight = (actionButtonData.actions.size + 1) * actionRowHeight
+        val maxScroll = maxOf(0, totalHeight - 50)
+        val sbY = menuY + 121
+        val percentage = ((mouseY - sbY) / 54.0).coerceIn(0.0, 1.0)
+        scrollOffset = (percentage * maxScroll).toInt()
+        scrollOffset = (scrollOffset / actionRowHeight) * actionRowHeight
+        scrollOffset = scrollOffset.coerceIn(0, maxScroll)
+        rebuildWidgets()
+    }
+
+    override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
+        // Handle Keybind capturing
+        if (settingKeybind) {
+            if (event.button() <= 2) {
+                isBoundKeybind = true
+                keybind.apply { clear(); add(event.button()); add(0); add(0); add(1) }
+            }
+            settingKeybind = false
+            updateKeybindLabel()
+            return true
+        }
+
+        // Handle Scrollbar dragging
+        if (isMouseOverScrollbar(event.x(), event.y())) {
+            isDraggingScrollbar = true
+            updateScrollFromMouse(event.y())
+            return true
+        }
+        return super.mouseClicked(event, doubleClick)
+    }
+
+    override fun mouseDragged(event: MouseButtonEvent, deltaX: Double, deltaY: Double): Boolean {
+        if (isDraggingScrollbar) {
+            updateScrollFromMouse(event.y())
+            return true
+        }
+        return super.mouseDragged(event, deltaX, deltaY)
+    }
+
+    override fun mouseReleased(event: MouseButtonEvent): Boolean {
+        isDraggingScrollbar = false
+        return super.mouseReleased(event)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
@@ -263,19 +318,6 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
         return super.keyPressed(event)
     }
 
-    override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
-        if (settingKeybind) {
-            if (event.button() <= 2) {
-                isBoundKeybind = true
-                keybind.apply { clear(); add(event.button()); add(0); add(0); add(1) }
-            }
-            settingKeybind = false
-            updateKeybindLabel()
-            return true
-        }
-        return super.mouseClicked(event, doubleClick)
-    }
-
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         val titleWidth = font.width(title)
         guiGraphics.drawString(font, title, (width - titleWidth) / 2, menuY - 15, -1, true)
@@ -290,6 +332,33 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
 
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         
+        val sepTopY = menuY + 120
+        guiGraphics.fill(menuX + 1, sepTopY, menuX + menuWidth - 1, sepTopY + 1, 0x44FFFFFF.toInt())
+
+        // --- Scrollbar Drawing ---
+        val totalHeight = (actionButtonData.actions.size + 1) * actionRowHeight
+        if (totalHeight > 50) {
+            val sbX = menuX + menuWidth - 6
+            val sbY = menuY + 121
+            val sbH = 54
+            guiGraphics.fill(sbX, sbY, sbX + 3, sbY + sbH, 0x22FFFFFF.toInt())
+            val thumbH = maxOf(4, (50.0 / totalHeight.toDouble() * sbH).toInt())
+            val thumbY = sbY + (scrollOffset.toDouble() / (totalHeight - 50).toDouble() * (sbH - thumbH)).toInt()
+            val thumbColor = if (isDraggingScrollbar || isMouseOverScrollbar(mouseX.toDouble(), mouseY.toDouble())) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
+            guiGraphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbH, thumbColor)
+        }
+
+        // --- Scroll Fades ---
+        val listStartY = menuY + 121
+        val maxVisibleHeight = 54
+        val maxScroll = maxOf(0, totalHeight - 50)
+
+        if (scrollOffset > 0) guiGraphics.fillGradient(menuX + 1, listStartY, menuX + menuWidth - 1, listStartY + 12, 0x99000000.toInt(), 0x00000000.toInt())
+        if (scrollOffset < maxScroll) {
+            val fadeBottomY = menuY + menuHeight - 1
+            guiGraphics.fillGradient(menuX + 1, fadeBottomY - 12, menuX + menuWidth - 1, fadeBottomY, 0x00000000.toInt(), 0x99000000.toInt())
+        }
+
         guiGraphics.drawString(font, Component.translatable("menu.editor.property.name"), menuX + 10, menuY + 20, 0xFFAAAAAA.toInt(), true)
         guiGraphics.drawString(font, Component.translatable("menu.editor.property.icon"), menuX + 10, menuY + 45, 0xFFAAAAAA.toInt(), true)
         guiGraphics.drawString(font, "CustomModelData", menuX + 10, menuY + 75, 0xFFAAAAAA.toInt(), true)

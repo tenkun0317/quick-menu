@@ -10,10 +10,10 @@ class ModConfig {
         ALWAYS, KEYBIND_ONLY, NEVER
     }
 
-    // Menu settings
-    var menuWidth: Int = 180
-    var menuHeight: Int = 114
+    // Menu size based on button counts
     var buttonsPerRow: Int = 5
+    var visibleRows: Int = 2
+    
     var closeOnKeyReleased: Boolean = false
     var hideEditIcon: Boolean = false
 
@@ -22,10 +22,9 @@ class ModConfig {
     var showActionsInTooltip: Boolean = true
     var displayRunText: DisplayRunText = DisplayRunText.KEYBIND_ONLY
 
-    // Accessor methods to mimic owo-lib generated methods (to avoid breaking UI code)
-    fun menuWidth(): Int = menuWidth
-    fun menuHeight(): Int = menuHeight
+    // Helper methods for backward compatibility if needed
     fun buttonsPerRow(): Int = buttonsPerRow
+    fun visibleRows(): Int = visibleRows
     fun closeOnKeyReleased(): Boolean = closeOnKeyReleased
     fun hideEditIcon(): Boolean = hideEditIcon
     fun closeOnAction(): Boolean = closeOnAction

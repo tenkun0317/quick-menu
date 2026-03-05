@@ -19,23 +19,14 @@ class ModMenuIntegration : ModMenuApi {
 
             val menuCategory = builder.getOrCreateCategory(Component.translatable("text.config.quickmenu.section.menu"))
 
-            menuCategory.addEntry(entryBuilder.startIntField(Component.translatable("text.config.quickmenu.option.menuWidth"), config.menuWidth)
-                .setDefaultValue(180)
-                .setMin(60)
-                .setMax(450)
-                .setSaveConsumer { config.menuWidth = it }
-                .build())
-
-            menuCategory.addEntry(entryBuilder.startIntField(Component.translatable("text.config.quickmenu.option.menuHeight"), config.menuHeight)
-                .setDefaultValue(114)
-                .setMin(60)
-                .setMax(450)
-                .setSaveConsumer { config.menuHeight = it }
-                .build())
-
-            menuCategory.addEntry(entryBuilder.startIntSlider(Component.translatable("text.config.quickmenu.option.buttonsPerRow"), config.buttonsPerRow, 1, 14)
+            menuCategory.addEntry(entryBuilder.startIntSlider(Component.translatable("text.config.quickmenu.option.buttonsPerRow"), config.buttonsPerRow, 1, 15)
                 .setDefaultValue(5)
                 .setSaveConsumer { config.buttonsPerRow = it }
+                .build())
+
+            menuCategory.addEntry(entryBuilder.startIntSlider(Component.translatable("text.config.quickmenu.option.visibleRows"), config.visibleRows, 1, 10)
+                .setDefaultValue(2)
+                .setSaveConsumer { config.visibleRows = it }
                 .build())
 
             menuCategory.addEntry(entryBuilder.startBooleanToggle(Component.translatable("text.config.quickmenu.option.closeOnKeyReleased"), config.closeOnKeyReleased)
