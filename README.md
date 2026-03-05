@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/github/license/tenkun0317/quick-menu?style=flat-square)
 ![Version](https://img.shields.io/github/v/release/tenkun0317/quick-menu?style=flat-square)
 
-**Quick Menu (Renewed)** is a modernized, lightweight Fabric mod for Minecraft that provides a highly configurable menu for executing repetitive commands and keybindings. 
+**Quick Menu (Renewed)** is a modernized, lightweight Fabric MOD for Minecraft that provides a highly configurable menu for executing repetitive commands and keybindings. 
 
 This is a **renewed fork** maintained by **inorganic**, based on the original (abandoned) quick-menu. It has been completely rebuilt to remove heavy dependencies like `owo-lib`, offering a faster, cleaner, and more stable experience.
 
@@ -66,7 +66,7 @@ Original project by ImCodist. Renewed version by inorganic.
 
 # Quick Menu (Renewed) - 日本語
 
-**Quick Menu (Renewed)** は、繰り返しのコマンド実行やキーバインドを高度に設定可能なメニューで提供する、軽量でモダンな Fabric モッドです。
+**Quick Menu (Renewed)** は、繰り返しのコマンド実行やキーバインドを高度に設定可能なメニューで提供する、軽量でモダンなFabric MODです。
 
 これは **inorganic** によってメンテナンスされている、オリジナルの（開発停止した）quick-menu の **リニューアル版フォーク** です。`owo-lib` のような重い依存関係を排除し、より高速でクリーン、かつ安定した体験を提供するために完全に再構築されました。
 
