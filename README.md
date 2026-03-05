@@ -9,7 +9,7 @@ This is a **renewed fork** maintained by **inorganic**, based on the original (a
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 ### Modern & Minimalist Design
 * **Glassmorphism UI**: A sleek, semi-transparent charcoal interface designed to blend seamlessly with the modern Minecraft look.
@@ -29,10 +29,10 @@ This is a **renewed fork** maintained by **inorganic**, based on the original (a
 
 ---
 
-## 🛠 Usage
+## Usage
 
 1. **Open Menu**: Press `G` (default) to open the menu.
-2. **Edit Mode**: Click the pencil icon (`✎`) or press `E` to enter edit mode.
+2. **Edit Mode**: Click the pencil icon (`$270E`) or press `E` to enter edit mode.
 3. **Add Action**: Use the `+ Action` button at the bottom of the editor.
 4. **Quick Organize (Edit Mode only)**:
    - **Ctrl + Left Click**: Move button left.
@@ -41,7 +41,7 @@ This is a **renewed fork** maintained by **inorganic**, based on the original (a
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
 * [Fabric Loader](https://fabricmc.net/)
 * [Fabric API](https://modrinth.com/mod/fabric-api)
@@ -50,14 +50,14 @@ This is a **renewed fork** maintained by **inorganic**, based on the original (a
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **GNU General Public License v3.0**.  
 Original project by ImCodist. Renewed version by inorganic.
 
 ---
 
-## 🔗 Links
+## Links
 
 * **Repository**: [https://github.com/tenkun0317/quick-menu](https://github.com/tenkun0317/quick-menu)
 * **Report Bugs**: [Issues Page](https://github.com/tenkun0317/quick-menu/issues)
@@ -72,7 +72,7 @@ Original project by ImCodist. Renewed version by inorganic.
 
 ---
 
-## 🌟 主な機能
+## 主な機能
 
 ### モダンでミニマルなデザイン
 * **グラスモーフィズム UI**: Minecraft のモダンな外観にシームレスに溶け込むよう設計された、洗練された半透明のチャコールインターフェース。
@@ -92,10 +92,10 @@ Original project by ImCodist. Renewed version by inorganic.
 
 ---
 
-## 🛠 使い方
+## 使い方
 
 1. **メニューを開く**: `G`（デフォルト）を押してメニューを開きます。
-2. **編集モード**: 鉛筆アイコン (`✎`) をクリックするか、`E` を押して編集モードに入ります。
+2. **編集モード**: 鉛筆アイコン (`$270E`) をクリックするか、`E` を押して編集モードに入ります。
 3. **アクションを追加**: エディターの下部にある `+ Action` ボタンを使用します。
 4. **クイック整理 (編集モードのみ)**:
    - **Ctrl + 左クリック**: ボタンを左に移動。
@@ -104,7 +104,7 @@ Original project by ImCodist. Renewed version by inorganic.
 
 ---
 
-## 📦 依存関係
+## 依存関係
 
 * [Fabric Loader](https://fabricmc.net/)
 * [Fabric API](https://modrinth.com/mod/fabric-api)
@@ -113,14 +113,14 @@ Original project by ImCodist. Renewed version by inorganic.
 
 ---
 
-## 📜 ライセンス
+## ライセンス
 
 このプロジェクトは **GNU General Public License v3.0** の下でライセンスされています。  
 ImCodist によるオリジナルプロジェクト。inorganic によるリニューアル版。
 
 ---
 
-## 🔗 リンク
+## リンク
 
 * **リポジトリ**: [https://github.com/tenkun0317/quick-menu](https://github.com/tenkun0317/quick-menu)
 * **バグ報告**: [Issues Page](https://github.com/tenkun0317/quick-menu/issues)
