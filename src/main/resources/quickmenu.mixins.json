@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "xyz.imcodist.quickmenu.mixins",
+	"package": "xyz.inorganic.quickmenu.mixins",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
       "KeyBindingMixin"

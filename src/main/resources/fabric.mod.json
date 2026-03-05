@@ -2,30 +2,30 @@
 	"schemaVersion": 1,
 	"id": "quickmenu",
 	"version": "${version}",
-	"name": "Quick Menu",
-	"description": "Adds a configurable easy-to-access menu that runs basic repetitive commands.",
+	"name": "Quick Menu (Renewed)",
+	"description": "A modernized, lightweight configurable menu for commands and keybindings. Rebuilt for performance and stability.",
 	"authors": [
 		{
-			"name": "codist",
+			"name": "inorganic",
 			"contact": {
-				"homepage": "https://imcodist.xyz"
+				"homepage": "https://github.com/tenkun0317"
 			}
 		}
 	],
 	"contact": {
-		"homepage": "https://github.com/ImCodist/quick-menu",
-		"sources": "https://github.com/ImCodist/quick-menu",
-		"issues": "https://github.com/ImCodist/quick-menu/issues"
+		"homepage": "https://github.com/tenkun0317/quick-menu",
+		"sources": "https://github.com/tenkun0317/quick-menu",
+		"issues": "https://github.com/tenkun0317/quick-menu/issues"
 	},
-	"license": "GNU-3.0",
+	"license": "GPL-3.0",
 	"icon": "assets/quickmenu/icon.png",
 	"environment": "client",
 	"entrypoints": {
 		"main": [
-          "xyz.imcodist.quickmenu.QuickMenu"
+          "xyz.inorganic.quickmenu.QuickMenu"
 		],
 		"modmenu": [
-		  "xyz.imcodist.quickmenu.other.ModMenuIntegration"
+		  "xyz.inorganic.quickmenu.other.ModMenuIntegration"
 		]
 	},
 	"mixins": [
