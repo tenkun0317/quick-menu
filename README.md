@@ -1,5 +1,7 @@
 # Quick Menu (Renewed)
 
+[English](README.md) | [日本語](README.md#quick-menu-renewed---日本語)
+
 ![License](https://img.shields.io/github/license/tenkun0317/quick-menu?style=flat-square)
 ![Version](https://img.shields.io/github/v/release/tenkun0317/quick-menu?style=flat-square)
 
@@ -23,7 +25,7 @@ This is a **renewed fork** maintained by **inorganic**, based on the original (a
 * **Modifier Keybinds**: Supports complex combinations like `Ctrl + C`, `Shift + G`, etc.
 
 ### Expert Productivity
-* **Quick Reorder (Ctrl + Click)**: Reorder buttons directly from the main menu by holding Ctrl.
+* **Quick Reorder (Ctrl + Click)**: Reorder buttons directly from the main menu by holding Ctrl while in edit mode.
 * **Quick Delete (Shift + Click)**: Instantly delete buttons while in edit mode by holding Shift.
 * **Release to Execute**: Optionally trigger the hovered action the moment you release the menu key.
 
@@ -32,7 +34,7 @@ This is a **renewed fork** maintained by **inorganic**, based on the original (a
 ## Usage
 
 1. **Open Menu**: Press `G` (default) to open the menu.
-2. **Edit Mode**: Click the pencil icon (`$270E`) or press `E` to enter edit mode.
+2. **Edit Mode**: Click the pencil icon (`✎`) or press `E` to enter edit mode.
 3. **Add Action**: Use the `+ Action` button at the bottom of the editor.
 4. **Quick Organize (Edit Mode only)**:
    - **Ctrl + Left Click**: Move button left.
@@ -66,7 +68,7 @@ Original project by ImCodist. Renewed version by inorganic.
 
 # Quick Menu (Renewed) - 日本語
 
-**Quick Menu (Renewed)** は、繰り返しのコマンド実行やキーバインドを高度に設定可能なメニューで提供する、軽量でモダンなFabric MODです。
+**Quick Menu (Renewed)** は、繰り返しのコマンド実行やキーバインドを高度に設定可能なメニューで提供する、軽量でモダンな Fabric MOD です。
 
 これは **inorganic** によってメンテナンスされている、オリジナルの（開発停止した）quick-menu の **リニューアル版フォーク** です。`owo-lib` のような重い依存関係を排除し、より高速でクリーン、かつ安定した体験を提供するために完全に再構築されました。
 
@@ -86,7 +88,7 @@ Original project by ImCodist. Renewed version by inorganic.
 * **修飾キーバインド**: `Ctrl + C` や `Shift + G` などの複雑な組み合わせをサポート。
 
 ### エキスパート向けの生産性
-* **クイック並べ替え (Ctrl + クリック)**: メインメニューから Ctrl を押し続けながらボタンを直接並べ替え。
+* **クイック並べ替え (Ctrl + クリック)**: 編集モード中に Ctrl を押し続けながらボタンをドラッグするかクリックして、メインメニュー上で直接並べ替え。
 * **クイック削除 (Shift + クリック)**: 編集モード中に Shift を押し続けながらボタンを即座に削除。
 * **離して実行**: メニューキーを離した瞬間に、ホバーしているアクションを実行するオプション。
 
@@ -95,12 +97,12 @@ Original project by ImCodist. Renewed version by inorganic.
 ## 使い方
 
 1. **メニューを開く**: `G`（デフォルト）を押してメニューを開きます。
-2. **編集モード**: 鉛筆アイコン (`$270E`) をクリックするか、`E` を押して編集モードに入ります。
-3. **アクションを追加**: エディターの下部にある `+ Action` ボタンを使用します。
+2. **編集モード**: 鉛筆アイコン (`✎`) をクリックするか、`E` キーを押して編集モードに入ります。
+3. **アクションを追加**: エディターの下部にある `アクションを追加` ボタンを使用します。
 4. **クイック整理 (編集モードのみ)**:
    - **Ctrl + 左クリック**: ボタンを左に移動。
    - **Ctrl + 右クリック**: ボタンを右に移動。
-   - **Shift + クリック**: ボタンを削除。
+   - **Shift + 左クリック**: ボタンを削除。
 
 ---
 

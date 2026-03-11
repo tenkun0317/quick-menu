@@ -125,7 +125,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                     cmdBox.setResponder { actionButtonData.actions[index] = CommandActionData(it) }
                     addRenderableWidget(cmdBox)
                 } else if (action is KeybindActionData) {
-                    val kbBtn = Button.builder(Component.literal("Key: ${getReadableKeyName(action.translationKey)}")) {
+                    val kbBtn = Button.builder(Component.translatable("text.action.key", getReadableKeyName(action.translationKey))) {
                         syncInputToData()
                         val picker = KeybindPickerUI()
                         picker.previousScreen = this
@@ -147,7 +147,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
 
         val addActionY = listStartY + actionButtonData.actions.size * actionRowHeight - scrollOffset
         if (addActionY >= listStartY && addActionY + 20 <= listStartY + maxVisibleHeight) {
-            addRenderableWidget(Button.builder(Component.literal("+ Action")) {
+            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.add_action")) {
                 syncInputToData()
                 val picker = ActionPickerUI()
                 picker.previousScreen = this

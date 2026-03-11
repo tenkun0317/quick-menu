@@ -76,11 +76,11 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         if (editMode) {
             val editorY = menuY + menuHeight + 8
-            addRenderableWidget(Button.builder(Component.literal("+ Action")) {
+            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.add_action")) {
                 gotoActionEditor(null)
             }.pos(menuX, editorY).size(menuWidth / 2 - 2, 20).build())
 
-            addRenderableWidget(Button.builder(Component.literal("Settings")) {
+            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.settings")) {
                 minecraft?.setScreen(ModMenuIntegration().getModConfigScreenFactory().create(this))
             }.pos(menuX + menuWidth / 2 + 2, editorY).size(menuWidth / 2 - 2, 20).build())
         }

@@ -6,6 +6,14 @@
   "menu.main.title": "Quick Menu",
   "menu.main.no_actions": "No actions created.",
   "menu.main.button.add_action": "Add Action",
+  "menu.main.button.settings": "Settings",
+
+  "menu.action_picker.title": "Select Action Type",
+  "menu.action_picker.command": "Command",
+  "menu.action_picker.keybind": "Keybind",
+
+  "text.action.run_feedback": "Ran action \"%s\"",
+  "text.action.key": "Key: %s",
   "menu.main.button.config": "Config",
 
   "menu.action_picker.select": " > ",

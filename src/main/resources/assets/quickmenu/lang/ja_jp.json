@@ -1,44 +1,52 @@
 {
-  "key.category.quickmenu": "Quick Menu",
-  "key.quickmenu.open": "Open Menu",
+  "key.category.quickmenu": "クイックメニュー",
+  "key.quickmenu.open": "メニューを開く",
 
 
-  "menu.main.title": "Quick Menu",
-  "menu.main.no_actions": "アクションが作成されていません"
+  "menu.main.title": "クイックメニュー",
+  "menu.main.no_actions": "アクションが作成されていません。",
   "menu.main.button.add_action": "アクションを追加",
+  "menu.main.button.settings": "設定",
+
+  "menu.action_picker.title": "アクションの種類を選択",
+  "menu.action_picker.command": "コマンド",
+  "menu.action_picker.keybind": "キーバインド",
+
+  "text.action.run_feedback": "アクション「%s」を実行しました",
+  "text.action.key": "キー: %s",
   "menu.main.button.config": "設定",
 
   "menu.action_picker.select": " > ",
 
 
-  "menu.editor.title": "アクション エディター",
-  "menu.editor.button.finish": "終了",
-  "menu.editor.button.cancel": "戻る",
+  "menu.editor.title": "アクションエディター",
+  "menu.editor.button.finish": "完了",
+  "menu.editor.button.cancel": "キャンセル",
   "menu.editor.actions": "アクション",
-  "menu.editor.advanced": "上級",
-  "menu.editor.not_bound": "Not Bound",
+  "menu.editor.advanced": "詳細設定",
+  "menu.editor.not_bound": "未設定",
 
   "menu.editor.property.name": "名前",
   "menu.editor.property.icon": "アイコン",
   "menu.editor.property.keybind": "キーバインド",
-  "menu.editor.property.custommodeldata": "Custom Model Data",
-  "menu.editor.property.new_action": "新しい アクション",
+  "menu.editor.property.custommodeldata": "カスタムモデルデータ",
+  "menu.editor.property.new_action": "新規アクション",
 
 
-  "text.config.quickmenu.title": "Quick Menu Config",
+  "text.config.quickmenu.title": "Quick Menu 設定",
 
   "text.config.quickmenu.section.menu": "メニュー",
-  "text.config.quickmenu.section.action_buttons": "Action Buttons",
+  "text.config.quickmenu.section.action_buttons": "アクションボタン",
 
-  "text.config.quickmenu.option.buttonsPerRow": "Buttons per Row",
-  "text.config.quickmenu.option.visibleRows": "Visible Rows",
-  "text.config.quickmenu.option.closeOnAction": "アクションを閉じる",
+  "text.config.quickmenu.option.buttonsPerRow": "1行あたりのボタン数",
+  "text.config.quickmenu.option.visibleRows": "表示する行数",
+  "text.config.quickmenu.option.closeOnAction": "実行時に閉じる",
   "text.config.quickmenu.option.closeOnKeyReleased": "キーを離したら閉じる",
-  "text.config.quickmenu.option.hideEditIcon": "Hide Edit Icon",
-  "text.config.quickmenu.option.showActionsInTooltip": "Show Actions in Tooltip",
-  "text.config.quickmenu.option.displayRunText": "Show Run Text",
+  "text.config.quickmenu.option.hideEditIcon": "編集アイコンを非表示",
+  "text.config.quickmenu.option.showActionsInTooltip": "ツールチップにアクションを表示",
+  "text.config.quickmenu.option.displayRunText": "実行テキストの表示",
 
-  "text.config.quickmenu.option.displayRunText.value.always": "常に",
-  "text.config.quickmenu.option.displayRunText.value.keybind_only": "Keybind Only",
-  "text.config.quickmenu.option.displayRunText.value.never": "Never"
+  "text.config.quickmenu.option.displayRunText.value.always": "常に表示",
+  "text.config.quickmenu.option.displayRunText.value.keybind_only": "キーバインドのみ",
+  "text.config.quickmenu.option.displayRunText.value.never": "非表示"
 }

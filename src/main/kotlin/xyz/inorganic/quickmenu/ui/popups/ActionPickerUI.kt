@@ -10,7 +10,7 @@ import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
 import xyz.inorganic.quickmenu.ui.surfaces.SwitcherSurface
 import java.util.function.Consumer
 
-class ActionPickerUI : Screen(Component.empty()) {
+class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")) {
     var onSelectedAction: Consumer<ActionData> = Consumer {}
     var previousScreen: Screen? = null
 
@@ -25,13 +25,13 @@ class ActionPickerUI : Screen(Component.empty()) {
 
         val startY = menuY + 10
         
-        val commandBtn = Button.builder(Component.literal("Command")) {
+        val commandBtn = Button.builder(Component.translatable("menu.action_picker.command")) {
             onSelectedAction.accept(CommandActionData())
             onClose()
         }.pos(menuX + 10, startY).size(160, 20).build()
         addRenderableWidget(commandBtn)
 
-        val keybindBtn = Button.builder(Component.literal("Keybind")) {
+        val keybindBtn = Button.builder(Component.translatable("menu.action_picker.keybind")) {
             onSelectedAction.accept(KeybindActionData())
             onClose()
         }.pos(menuX + 10, startY + 25).size(160, 20).build()

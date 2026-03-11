@@ -31,7 +31,7 @@ class ActionButtonData(
         if (displayRunText == ModConfig.DisplayRunText.ALWAYS || 
             (displayRunText == ModConfig.DisplayRunText.KEYBIND_ONLY && isKeybind)) {
             val client = Minecraft.getInstance()
-            client.player?.displayClientMessage(Component.literal("Ran action \"$name\""), true)
+            client.player?.displayClientMessage(Component.translatable("text.action.run_feedback", name), true)
         }
 
         actions.forEach { it.run() }
