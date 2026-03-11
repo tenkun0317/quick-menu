@@ -13,15 +13,18 @@ import java.util.*
 @Serializable
 data class ActionButtonDataJSON(
     val name: String,
-    val actions: List<List<String>>,
+    val actions: List<List<String>> = emptyList(),
     val icon: String? = null,
     val customModelData: String? = null,
-    val keybind: List<Int> = emptyList()
+    val keybind: List<Int> = emptyList(),
+    val isFolder: Boolean = false,
+    val children: List<ActionButtonDataJSON> = emptyList()
 ) {
     fun toActionButtonData(): ActionButtonData {
         val data = ActionButtonData(
             name = name,
-            keybind = keybind.toMutableList()
+            keybind = keybind.toMutableList(),
+            isFolder = isFolder
         )
         
         data.actions = actions.mapNotNull { actionList ->
@@ -37,18 +40,22 @@ data class ActionButtonDataJSON(
         }.toMutableList()
         
         if (icon != null) {
-            val identifier = Identifier.parse(icon)
-            val itemOptional = BuiltInRegistries.ITEM.get(identifier)
-            var stack = ItemStack.EMPTY
-            if (itemOptional.isPresent) {
-                stack = ItemStack(itemOptional.get())
-            }
-            if (customModelData != null && customModelData.isNotEmpty()) {
-                val cmdValues = ActionButtonData.CustomModelDataValues(customModelData)
-                stack.set(DataComponents.CUSTOM_MODEL_DATA, cmdValues.getComponent())
-            }
-            data.icon = stack
+            try {
+                val identifier = Identifier.parse(icon)
+                val itemOptional = BuiltInRegistries.ITEM.get(identifier)
+                var stack = ItemStack.EMPTY
+                if (itemOptional.isPresent) {
+                    stack = ItemStack(itemOptional.get())
+                }
+                if (customModelData != null && customModelData.isNotEmpty()) {
+                    val cmdValues = ActionButtonData.CustomModelDataValues(customModelData)
+                    stack.set(DataComponents.CUSTOM_MODEL_DATA, cmdValues.getComponent())
+                }
+                data.icon = stack
+            } catch (ignored: Exception) {}
         }
+
+        data.children = children.map { it.toActionButtonData() }.toMutableList()
         
         return data
     }
@@ -73,6 +80,8 @@ fun ActionButtonData.toJSON(): ActionButtonDataJSON {
         actions = actionList,
         icon = iconStr,
         customModelData = cmdStr,
-        keybind = keybind.toList()
+        keybind = keybind.toList(),
+        isFolder = isFolder,
+        children = children.map { it.toJSON() }
     )
 }

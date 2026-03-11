@@ -33,14 +33,22 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private val buttonDataMap = mutableMapOf<QuickMenuButton, ActionButtonData>()
     private var isDraggingScrollbar = false
 
+    companion object {
+        private val navigationStack = mutableListOf<ActionButtonData>()
+        
+        fun currentFolder(): ActionButtonData? = navigationStack.lastOrNull()
+        fun navigateTo(folder: ActionButtonData) = navigationStack.add(folder)
+        fun navigateToLevel(index: Int) {
+            if (index == -1) navigationStack.clear()
+            else while (navigationStack.size > index + 1) navigationStack.removeAt(navigationStack.size - 1)
+        }
+        fun navigateRoot() = navigationStack.clear()
+    }
+
     override fun init() {
         val config = QuickMenu.CONFIG
-        val colCount = config.buttonsPerRow
-        val rowCount = config.visibleRows
-        
-        menuWidth = (colCount * 30) + 16
-        menuHeight = 24 + (rowCount * 30) + 5
-        
+        menuWidth = config.buttonsPerRow * 30 + 16
+        menuHeight = 24 + config.visibleRows * 30 + 5
         menuX = (width - menuWidth) / 2
         menuY = (height - menuHeight) / 2
 
@@ -53,19 +61,19 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             }.pos(menuX + menuWidth - 22, menuY + 4).size(18, 18).build())
         }
 
-        val actions = ActionButtonDataHandler.actions
+        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
         val startX = menuX + 10
         val startY = menuY + 28
-        val visibleAreaHeight = rowCount * rowHeight
+        val visibleAreaHeight = config.visibleRows * rowHeight
 
         actions.forEachIndexed { index, data ->
-            val row = index / colCount
-            val col = index % colCount
+            val row = index / config.buttonsPerRow
+            val col = index % config.buttonsPerRow
             val btnX = startX + col * 30
             val btnY = startY + row * rowHeight - scrollOffset
 
             if (btnY >= startY && btnY + 26 <= startY + visibleAreaHeight) {
-                val button = QuickMenuButton(data.icon, { handleLeftClick(data) }, { handleRightClick(data) })
+                val button = QuickMenuButton(data.icon, { handleLeftClick(data) }, { handleRightClick(data) }, data.isFolder)
                 button.x = btnX
                 button.y = btnY
                 button.setTooltip(Tooltip.create(Component.literal(data.name)))
@@ -76,11 +84,11 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         if (editMode) {
             val editorY = menuY + menuHeight + 8
-            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.add_action")) {
+            addRenderableWidget(Button.builder(Component.literal("+ Action")) {
                 gotoActionEditor(null)
             }.pos(menuX, editorY).size(menuWidth / 2 - 2, 20).build())
 
-            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.settings")) {
+            addRenderableWidget(Button.builder(Component.literal("Settings")) {
                 minecraft?.setScreen(ModMenuIntegration().getModConfigScreenFactory().create(this))
             }.pos(menuX + menuWidth / 2 + 2, editorY).size(menuWidth / 2 - 2, 20).build())
         }
@@ -93,31 +101,23 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     private fun isMouseOverScrollbar(mouseX: Double, mouseY: Double): Boolean {
         val config = QuickMenu.CONFIG
-        val totalRows = ceil(ActionButtonDataHandler.actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
+        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
         if (totalRows <= config.visibleRows) return false
-
         val sbX = menuX + menuWidth - 6
-        val sbY = menuY + 28
-        val sbHeight = config.visibleRows * rowHeight
-        return mouseX >= sbX && mouseX <= sbX + 4 && mouseY >= sbY && mouseY <= sbY + sbHeight
+        return mouseX >= sbX && mouseX <= sbX + 4 && mouseY >= menuY + 28 && mouseY <= menuY + 28 + (config.visibleRows * rowHeight)
     }
 
     private fun updateScrollFromMouse(mouseY: Double) {
         val config = QuickMenu.CONFIG
-        val totalRows = ceil(ActionButtonDataHandler.actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
-        val visibleRows = config.visibleRows
-        val totalContentHeight = totalRows * rowHeight
-        val visibleHeight = visibleRows * rowHeight
-        val maxScroll = maxOf(0, totalContentHeight - visibleHeight)
-        
+        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
+        val visibleH = config.visibleRows * rowHeight
+        val maxScroll = maxOf(0, (totalRows * rowHeight) - visibleH)
         val sbY = menuY + 28
-        val sbHeight = visibleHeight.toDouble()
-        
-        val percentage = ((mouseY - sbY) / sbHeight).coerceIn(0.0, 1.0)
-        scrollOffset = (percentage * maxScroll).toInt()
-        scrollOffset = (scrollOffset / rowHeight) * rowHeight
+        val percentage = ((mouseY - sbY) / visibleH.toDouble()).coerceIn(0.0, 1.0)
+        scrollOffset = ((percentage * maxScroll).toInt() / rowHeight) * rowHeight
         scrollOffset = scrollOffset.coerceIn(0, maxScroll)
-        
         rebuildWidgets()
     }
 
@@ -127,6 +127,30 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             updateScrollFromMouse(event.y())
             return true
         }
+
+        // Check breadcrumb clicks
+        var currentX = menuX + 10
+        val y = menuY + 8
+        val rootWidth = font.width("Root")
+        if (event.x() >= currentX && event.x() <= currentX + rootWidth && event.y() >= y && event.y() <= y + 9) {
+            navigateToLevel(-1)
+            scrollOffset = 0
+            rebuildWidgets()
+            return true
+        }
+        currentX += rootWidth + 5
+        navigationStack.forEachIndexed { index, data ->
+            currentX += font.width(">") + 5
+            val nameWidth = font.width(data.name)
+            if (event.x() >= currentX && event.x() <= currentX + nameWidth && event.y() >= y && event.y() <= y + 9) {
+                navigateToLevel(index)
+                scrollOffset = 0
+                rebuildWidgets()
+                return true
+            }
+            currentX += nameWidth + 5
+        }
+
         return super.mouseClicked(event, doubleClick)
     }
 
@@ -138,10 +162,22 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         return super.mouseDragged(event, deltaX, deltaY)
     }
 
+    override fun mouseReleased(event: MouseButtonEvent): Boolean {
+        isDraggingScrollbar = false
+        if (!editMode && QuickMenu.CONFIG.closeOnKeyReleased) {
+            if (ModKeybindings.menuOpenKeybinding.matchesMouse(event)) {
+                handleReleaseAction()
+                return true
+            }
+        }
+        return super.mouseReleased(event)
+    }
+
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
         val config = QuickMenu.CONFIG
-        val totalRows = ceil(ActionButtonDataHandler.actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
-        val maxScroll = maxOf(0, (totalRows - config.visibleRows) * rowHeight)
+        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
+        val maxScroll = maxOf(0, (totalRows * rowHeight) - (config.visibleRows * rowHeight))
         scrollOffset = (scrollOffset - (verticalAmount * rowHeight).toInt()).coerceIn(0, maxScroll)
         rebuildWidgets()
         return true
@@ -151,44 +187,36 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         guiGraphics.fill(menuX - 1, menuY - 1, menuX + menuWidth + 1, menuY + menuHeight + 1, 0x44000000.toInt())
         guiGraphics.fill(menuX, menuY, menuX + menuWidth, menuY + menuHeight, 0xCC121212.toInt())
         renderThinBorder(guiGraphics, menuX, menuY, menuWidth, menuHeight, 0x33FFFFFF.toInt())
-        
         guiGraphics.fill(menuX, menuY, menuX + menuWidth, menuY + 24, 0x22FFFFFF.toInt())
         val separatorY = menuY + 24
         guiGraphics.fill(menuX + 1, separatorY, menuX + menuWidth - 1, separatorY + 1, 0x44FFFFFF.toInt())
 
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         
-        // --- Scrollbar Drawing ---
-        val config = QuickMenu.CONFIG
-        val totalRows = ceil(ActionButtonDataHandler.actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
-        if (totalRows > config.visibleRows) {
+        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val totalRows = ceil(actions.size.toDouble() / QuickMenu.CONFIG.buttonsPerRow.toDouble()).toInt()
+        if (totalRows > QuickMenu.CONFIG.visibleRows) {
             val sbX = menuX + menuWidth - 5
             val sbY = menuY + 28
-            val sbHeight = config.visibleRows * rowHeight
-            
-            guiGraphics.fill(sbX, sbY, sbX + 3, sbY + sbHeight, 0x22FFFFFF.toInt())
-            
-            val thumbHeight = maxOf(4, (config.visibleRows.toDouble() / totalRows.toDouble() * sbHeight).toInt())
-            val maxScroll = (totalRows - config.visibleRows) * rowHeight
-            val thumbY = if (maxScroll > 0) {
-                sbY + (scrollOffset.toDouble() / maxScroll.toDouble() * (sbHeight - thumbHeight)).toInt()
-            } else sbY
-            
+            val sbH = QuickMenu.CONFIG.visibleRows * rowHeight
+            guiGraphics.fill(sbX, sbY, sbX + 3, sbY + sbH, 0x22FFFFFF.toInt())
+            val thumbH = maxOf(4, (QuickMenu.CONFIG.visibleRows.toDouble() / totalRows.toDouble() * sbH).toInt())
+            val maxScroll = (totalRows - QuickMenu.CONFIG.visibleRows) * rowHeight
+            val thumbY = if (maxScroll > 0) sbY + (scrollOffset.toDouble() / maxScroll.toDouble() * (sbH - thumbH)).toInt() else sbY
             val thumbColor = if (isDraggingScrollbar || isMouseOverScrollbar(mouseX.toDouble(), mouseY.toDouble())) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
-            guiGraphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbHeight, thumbColor)
+            guiGraphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbH, thumbColor)
         }
 
         val contentStartY = menuY + 25
-        val contentHeight = config.visibleRows * rowHeight
-        val contentEndY = contentStartY + contentHeight + 3
-        val maxScroll = maxOf(0, (totalRows - config.visibleRows) * rowHeight)
+        val contentEndY = contentStartY + QuickMenu.CONFIG.visibleRows * rowHeight + 3
+        val maxScroll = maxOf(0, (totalRows - QuickMenu.CONFIG.visibleRows) * rowHeight)
 
         if (scrollOffset > 0) guiGraphics.fillGradient(menuX + 1, contentStartY, menuX + menuWidth - 1, contentStartY + 12, 0x99000000.toInt(), 0x00000000.toInt())
         if (scrollOffset < maxScroll) guiGraphics.fillGradient(menuX + 1, contentEndY - 12, menuX + menuWidth - 1, contentEndY, 0x00000000.toInt(), 0x99000000.toInt())
 
-        guiGraphics.drawString(font, title, menuX + 10, menuY + 8, -1, true)
+        renderBreadcrumbs(guiGraphics, mouseX, mouseY)
 
-        if (ActionButtonDataHandler.actions.isEmpty()) {
+        if (actions.isEmpty()) {
             val emptyMsg = Component.translatable("menu.main.no_actions")
             val msgW = font.width(emptyMsg)
             guiGraphics.drawString(font, emptyMsg, menuX + (menuWidth - msgW) / 2, menuY + (menuHeight / 2), 0x66FFFFFF.toInt(), false)
@@ -205,6 +233,33 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                     else if (isCtrlDown) renderIndicator(guiGraphics, btn, 0xFF00AAFF.toInt(), "↔")
                 }
             }
+        }
+    }
+
+    private fun renderBreadcrumbs(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int) {
+        var currentX = menuX + 10
+        val y = menuY + 8
+        
+        // Root
+        val rootLabel = "Root"
+        val rootWidth = font.width(rootLabel)
+        val isRootHovered = mouseX >= currentX && mouseX <= currentX + rootWidth && mouseY >= y && mouseY <= y + 9
+        val rootColor = if (navigationStack.isEmpty()) -1 else if (isRootHovered) 0xFFFFFFFF.toInt() else 0xFFAAAAAA.toInt()
+        guiGraphics.drawString(font, rootLabel, currentX, y, rootColor, true)
+        currentX += rootWidth + 5
+        
+        navigationStack.forEachIndexed { index, data ->
+            // Separator
+            guiGraphics.drawString(font, ">", currentX, y, 0xFF666666.toInt(), true)
+            currentX += font.width(">") + 5
+            
+            // Folder name
+            val nameWidth = font.width(data.name)
+            val isHovered = mouseX >= currentX && mouseX <= currentX + nameWidth && mouseY >= y && mouseY <= y + 9
+            val isLast = index == navigationStack.size - 1
+            val color = if (isLast) -1 else if (isHovered) 0xFFFFFFFF.toInt() else 0xFFAAAAAA.toInt()
+            guiGraphics.drawString(font, data.name, currentX, y, color, true)
+            currentX += nameWidth + 5
         }
     }
 
@@ -229,25 +284,47 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         val isCtrlDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL)
 
         if (editMode) {
-            if (isShiftDown) deleteAction(data)
-            else if (isCtrlDown) moveAction(data, -1)
-            else gotoActionEditor(data)
+            if (isShiftDown) {
+                deleteAction(data)
+            } else if (isCtrlDown) {
+                moveAction(data, -1)
+            } else {
+                if (data.isFolder) {
+                    navigateTo(data)
+                    scrollOffset = 0
+                    rebuildWidgets()
+                } else {
+                    gotoActionEditor(data)
+                }
+            }
             return
         }
-        data.run()
-        if (QuickMenu.CONFIG.closeOnAction) minecraft?.setScreen(null)
+
+        if (data.isFolder) {
+            navigateTo(data)
+            scrollOffset = 0
+            rebuildWidgets()
+        } else {
+            data.run()
+            if (QuickMenu.CONFIG.closeOnAction) minecraft?.setScreen(null)
+        }
     }
 
     private fun handleRightClick(data: ActionButtonData) {
         if (!editMode) return
         val window = Minecraft.getInstance().window
         val isCtrlDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL)
-        if (isCtrlDown) moveAction(data, 1)
-        else deleteAction(data)
+        
+        if (isCtrlDown) {
+            moveAction(data, 1)
+        } else {
+            // Right click ALWAYS opens editor in edit mode
+            gotoActionEditor(data)
+        }
     }
 
     private fun moveAction(data: ActionButtonData, direction: Int) {
-        val actions = ActionButtonDataHandler.actions
+        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
         val index = actions.indexOf(data)
         val newIndex = index + direction
         if (newIndex in 0 until actions.size) {
@@ -258,7 +335,9 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun deleteAction(data: ActionButtonData) {
-        ActionButtonDataHandler.remove(data)
+        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        actions.remove(data)
+        ActionButtonDataHandler.save()
         rebuildWidgets()
     }
 
@@ -272,7 +351,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         val hoveredBtn = buttonDataMap.keys.find { it.isHovered }
         hoveredBtn?.let { btn ->
             val data = buttonDataMap[btn]
-            if (data != null) handleLeftClick(data)
+            if (data != null && !data.isFolder) handleLeftClick(data)
         }
         minecraft?.setScreen(null)
     }
@@ -280,6 +359,12 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     override fun keyPressed(event: KeyEvent): Boolean {
         if (event.key() == GLFW.GLFW_KEY_E) {
             editMode = !editMode
+            rebuildWidgets()
+            return true
+        }
+        if (event.key() == GLFW.GLFW_KEY_BACKSPACE && currentFolder() != null) {
+            navigateToLevel(navigationStack.size - 2)
+            scrollOffset = 0
             rebuildWidgets()
             return true
         }
@@ -294,17 +379,6 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             }
         }
         return super.keyReleased(event)
-    }
-
-    override fun mouseReleased(event: MouseButtonEvent): Boolean {
-        isDraggingScrollbar = false
-        if (!editMode && QuickMenu.CONFIG.closeOnKeyReleased) {
-            if (ModKeybindings.menuOpenKeybinding.matchesMouse(event)) {
-                handleReleaseAction()
-                return true
-            }
-        }
-        return super.mouseReleased(event)
     }
 
     override fun isPauseScreen(): Boolean = false
