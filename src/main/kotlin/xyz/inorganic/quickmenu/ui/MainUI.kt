@@ -1,5 +1,6 @@
 package xyz.inorganic.quickmenu.ui
 
+import net.minecraft.client.gui.components.EditBox
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
@@ -23,6 +24,7 @@ import kotlin.math.ceil
 
 class MainUI : Screen(Component.translatable("menu.main.title")) {
     var editMode = false
+    private var isSearching = false
     private var menuX = 0
     private var menuY = 0
     private var menuWidth = 0
@@ -31,6 +33,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private var scrollOffset = 0
     private val rowHeight = 30
 
+    private lateinit var searchBox: EditBox
     private val buttonDataMap = mutableMapOf<QuickMenuButton, ActionButtonData>()
     private var isDraggingScrollbar = false
     private var firstInit = true
@@ -65,14 +68,44 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         buttonDataMap.clear()
 
+        // Search Box
+        if (isSearching) {
+            val existingValue = if (::searchBox.isInitialized) searchBox.value else ""
+            searchBox = EditBox(font, menuX + 8, menuY + 6, menuWidth - 50, 12, Component.empty())
+            searchBox.isBordered = false
+            searchBox.value = existingValue
+            searchBox.setResponder { 
+                scrollOffset = 0
+                rebuildWidgets() 
+            }
+            addRenderableWidget(searchBox)
+            setInitialFocus(searchBox)
+        }
+
+        // Toggle Buttons
+        val toggleButtonsY = menuY + 4
+        var currentToggleX = menuX + menuWidth - 22
+
         if (!config.hideEditIcon) {
             addRenderableWidget(Button.builder(Component.literal(if (editMode) "×" else "✎")) {
                 editMode = !editMode
                 rebuildWidgets()
-            }.pos(menuX + menuWidth - 22, menuY + 4).size(18, 18).build())
+            }.pos(currentToggleX, toggleButtonsY).size(18, 18).build())
+            currentToggleX -= 20
         }
 
-        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        addRenderableWidget(Button.builder(Component.literal(if (isSearching) "⌫" else "🔍")) {
+            isSearching = !isSearching
+            if (!isSearching && ::searchBox.isInitialized) searchBox.value = ""
+            rebuildWidgets()
+        }.pos(currentToggleX, toggleButtonsY).size(18, 18).build())
+
+        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
+            getFilteredActions(searchBox.value)
+        } else {
+            currentFolder()?.children ?: ActionButtonDataHandler.actions
+        }
+
         val startX = menuX + 10
         val startY = menuY + 28
         val visibleAreaHeight = config.visibleRows * rowHeight
@@ -105,6 +138,22 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
     }
 
+    private fun getFilteredActions(query: String): List<ActionButtonData> {
+        val result = mutableListOf<ActionButtonData>()
+        fun collect(actions: List<ActionButtonData>) {
+            for (action in actions) {
+                if (action.name.contains(query, ignoreCase = true)) {
+                    result.add(action)
+                }
+                if (action.isFolder) {
+                    collect(action.children)
+                }
+            }
+        }
+        collect(ActionButtonDataHandler.actions)
+        return result
+    }
+
     override fun rebuildWidgets() {
         clearWidgets()
         init()
@@ -112,7 +161,11 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     private fun isMouseOverScrollbar(mouseX: Double, mouseY: Double): Boolean {
         val config = QuickMenu.CONFIG
-        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
+            getFilteredActions(searchBox.value)
+        } else {
+            currentFolder()?.children ?: ActionButtonDataHandler.actions
+        }
         val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
         if (totalRows <= config.visibleRows) return false
         val sbX = menuX + menuWidth - 6
@@ -121,7 +174,11 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     private fun updateScrollFromMouse(mouseY: Double) {
         val config = QuickMenu.CONFIG
-        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
+            getFilteredActions(searchBox.value)
+        } else {
+            currentFolder()?.children ?: ActionButtonDataHandler.actions
+        }
         val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
         val visibleH = config.visibleRows * rowHeight
         val maxScroll = maxOf(0, (totalRows * rowHeight) - visibleH)
@@ -140,28 +197,30 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
 
         // Check breadcrumb clicks
-        val y = menuY + 8
-        val breadcrumbs = getBreadcrumbs()
-        breadcrumbs.forEach { (label, level, bounds) ->
-            if (event.x() >= bounds.first && event.x() <= bounds.second && event.y() >= y && event.y() <= y + 9) {
-                if (level == -2) { // "..."
-                    val visibleLevels = breadcrumbs.map { it.level }.toSet()
-                    val omitted = navigationStack.mapIndexedNotNull { index, data ->
-                        if (!visibleLevels.contains(index)) index to data.name else null
+        if (!isSearching) {
+            val y = menuY + 8
+            val breadcrumbs = getBreadcrumbs()
+            breadcrumbs.forEach { (label, level, bounds) ->
+                if (event.x() >= bounds.first && event.x() <= bounds.second && event.y() >= y && event.y() <= y + 9) {
+                    if (level == -2) { // "..."
+                        val visibleLevels = breadcrumbs.map { it.level }.toSet()
+                        val omitted = navigationStack.mapIndexedNotNull { index, data ->
+                            if (!visibleLevels.contains(index)) index to data.name else null
+                        }
+                        if (omitted.isNotEmpty()) {
+                            minecraft?.setScreen(BreadcrumbPopupUI(omitted, { 
+                                navigateToLevel(it)
+                                scrollOffset = 0
+                                rebuildWidgets()
+                            }, this))
+                        }
+                        return true
+                    } else {
+                        navigateToLevel(level)
+                        scrollOffset = 0
+                        rebuildWidgets()
+                        return true
                     }
-                    if (omitted.isNotEmpty()) {
-                        minecraft?.setScreen(BreadcrumbPopupUI(omitted, { 
-                            navigateToLevel(it)
-                            scrollOffset = 0
-                            rebuildWidgets()
-                        }, this))
-                    }
-                    return true
-                } else {
-                    navigateToLevel(level)
-                    scrollOffset = 0
-                    rebuildWidgets()
-                    return true
                 }
             }
         }
@@ -190,7 +249,11 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
         val config = QuickMenu.CONFIG
-        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
+            getFilteredActions(searchBox.value)
+        } else {
+            currentFolder()?.children ?: ActionButtonDataHandler.actions
+        }
         val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
         val maxScroll = maxOf(0, (totalRows * rowHeight) - (config.visibleRows * rowHeight))
         scrollOffset = (scrollOffset - (verticalAmount * rowHeight).toInt()).coerceIn(0, maxScroll)
@@ -229,7 +292,11 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         super.render(guiGraphics, mouseX, mouseY, partialTick)
         
-        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
+            getFilteredActions(searchBox.value)
+        } else {
+            currentFolder()?.children ?: ActionButtonDataHandler.actions
+        }
         val totalRows = ceil(actions.size.toDouble() / QuickMenu.CONFIG.buttonsPerRow.toDouble()).toInt()
         if (totalRows > QuickMenu.CONFIG.visibleRows) {
             val sbX = menuX + menuWidth - 5
@@ -250,7 +317,14 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         if (scrollOffset > 0) guiGraphics.fillGradient(menuX + 1, contentStartY, menuX + menuWidth - 1, contentStartY + 12, 0x99000000.toInt(), 0x00000000.toInt())
         if (scrollOffset < maxScroll) guiGraphics.fillGradient(menuX + 1, contentEndY - 12, menuX + menuWidth - 1, contentEndY, 0x00000000.toInt(), 0x99000000.toInt())
 
-        renderBreadcrumbs(guiGraphics, mouseX, mouseY)
+        if (!isSearching) {
+            renderBreadcrumbs(guiGraphics, mouseX, mouseY)
+        } else {
+            // Draw search focus underline
+            if (::searchBox.isInitialized && searchBox.isFocused) {
+                guiGraphics.fill(menuX + 8, menuY + 18, menuX + menuWidth - 42, menuY + 19, 0xAAFFFFFF.toInt())
+            }
+        }
 
         if (actions.isEmpty()) {
             val emptyMsg = Component.translatable("menu.main.no_actions")
@@ -394,6 +468,10 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                 moveAction(data, -1)
             } else {
                 if (data.isFolder) {
+                    if (isSearching) {
+                        isSearching = false
+                        if (::searchBox.isInitialized) searchBox.value = ""
+                    }
                     navigateTo(data)
                     scrollOffset = 0
                     rebuildWidgets()
@@ -405,6 +483,10 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
 
         if (data.isFolder) {
+            if (isSearching) {
+                isSearching = false
+                if (::searchBox.isInitialized) searchBox.value = ""
+            }
             navigateTo(data)
             scrollOffset = 0
             rebuildWidgets()
@@ -426,6 +508,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun moveAction(data: ActionButtonData, direction: Int) {
+        if (isSearching) return // Disable move in search mode
         val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
         val index = actions.indexOf(data)
         val newIndex = index + direction
@@ -437,8 +520,21 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun deleteAction(data: ActionButtonData) {
-        val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
-        actions.remove(data)
+        // If searching, we need to find the actual parent to delete from
+        if (isSearching) {
+            fun findAndDelete(list: MutableList<ActionButtonData>): Boolean {
+                if (list.remove(data)) return true
+                for (action in list) {
+                    if (action.isFolder && findAndDelete(action.children)) return true
+                }
+                return false
+            }
+            findAndDelete(ActionButtonDataHandler.actions)
+        } else {
+            val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
+            actions.remove(data)
+        }
+        
         ActionButtonDataHandler.save()
         rebuildWidgets()
     }
@@ -459,14 +555,26 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     override fun keyPressed(event: KeyEvent): Boolean {
+        if (event.key() == GLFW.GLFW_KEY_F && (event.modifiers() and GLFW.GLFW_MOD_CONTROL != 0)) {
+            isSearching = !isSearching
+            if (!isSearching && ::searchBox.isInitialized) searchBox.value = ""
+            rebuildWidgets()
+            return true
+        }
         if (event.key() == GLFW.GLFW_KEY_E) {
             editMode = !editMode
             rebuildWidgets()
             return true
         }
-        if (event.key() == GLFW.GLFW_KEY_BACKSPACE && currentFolder() != null) {
+        if (event.key() == GLFW.GLFW_KEY_BACKSPACE && currentFolder() != null && !isSearching) {
             navigateToLevel(navigationStack.size - 2)
             scrollOffset = 0
+            rebuildWidgets()
+            return true
+        }
+        if (event.key() == GLFW.GLFW_KEY_ESCAPE && isSearching) {
+            isSearching = false
+            if (::searchBox.isInitialized) searchBox.value = ""
             rebuildWidgets()
             return true
         }
