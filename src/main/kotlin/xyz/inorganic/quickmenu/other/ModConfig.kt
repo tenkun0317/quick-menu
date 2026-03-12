@@ -21,6 +21,12 @@ class ModConfig {
     var closeOnAction: Boolean = true
     var showActionsInTooltip: Boolean = true
     var displayRunText: DisplayRunText = DisplayRunText.KEYBIND_ONLY
+    
+    var keepNavigationHistory: Boolean = false
+
+    // Edit mode modifiers (Stored as InputConstants.Key.name)
+    var moveModifier: String = "key.keyboard.left.control"
+    var deleteModifier: String = "key.keyboard.left.shift"
 
     // Helper methods for backward compatibility if needed
     fun buttonsPerRow(): Int = buttonsPerRow
@@ -30,6 +36,9 @@ class ModConfig {
     fun closeOnAction(): Boolean = closeOnAction
     fun showActionsInTooltip(): Boolean = showActionsInTooltip
     fun displayRunText(): DisplayRunText = displayRunText
+    fun keepNavigationHistory(): Boolean = keepNavigationHistory
+    fun moveModifier(): String = moveModifier
+    fun deleteModifier(): String = deleteModifier
 
     companion object {
         private val GSON: Gson = GsonBuilder().setPrettyPrinting().create()

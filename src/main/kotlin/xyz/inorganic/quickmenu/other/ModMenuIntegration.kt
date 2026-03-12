@@ -1,5 +1,6 @@
 package xyz.inorganic.quickmenu.other
 
+import com.mojang.blaze3d.platform.InputConstants
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
 import me.shedaniel.clothconfig2.api.ConfigBuilder
@@ -37,6 +38,21 @@ class ModMenuIntegration : ModMenuApi {
             menuCategory.addEntry(entryBuilder.startBooleanToggle(Component.translatable("text.config.quickmenu.option.hideEditIcon"), config.hideEditIcon)
                 .setDefaultValue(false)
                 .setSaveConsumer { config.hideEditIcon = it }
+                .build())
+
+            menuCategory.addEntry(entryBuilder.startBooleanToggle(Component.translatable("text.config.quickmenu.option.keepNavigationHistory"), config.keepNavigationHistory)
+                .setDefaultValue(false)
+                .setSaveConsumer { config.keepNavigationHistory = it }
+                .build())
+
+            menuCategory.addEntry(entryBuilder.startKeyCodeField(Component.translatable("text.config.quickmenu.option.moveModifier"), InputConstants.getKey(config.moveModifier))
+                .setDefaultValue(InputConstants.getKey("key.keyboard.left.control"))
+                .setKeySaveConsumer { config.moveModifier = it.toString() }
+                .build())
+
+            menuCategory.addEntry(entryBuilder.startKeyCodeField(Component.translatable("text.config.quickmenu.option.deleteModifier"), InputConstants.getKey(config.deleteModifier))
+                .setDefaultValue(InputConstants.getKey("key.keyboard.left.shift"))
+                .setKeySaveConsumer { config.deleteModifier = it.toString() }
                 .build())
 
             val actionCategory = builder.getOrCreateCategory(Component.translatable("text.config.quickmenu.section.action_buttons"))

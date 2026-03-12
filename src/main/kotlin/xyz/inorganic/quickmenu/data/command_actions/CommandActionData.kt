@@ -22,7 +22,7 @@ class CommandActionData(
             commandToRun = commandToRun.substring(1)
             player.connection.sendCommand(commandToRun)
         } else {
-            if (commandToRun.length >= 256) {
+            if (commandToRun.length > 256) {
                 commandToRun = commandToRun.substring(0, 256)
             }
             player.connection.sendChat(commandToRun)

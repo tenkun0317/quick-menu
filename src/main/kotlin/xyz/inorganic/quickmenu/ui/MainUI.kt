@@ -17,6 +17,7 @@ import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
 import xyz.inorganic.quickmenu.other.ModKeybindings
 import xyz.inorganic.quickmenu.other.ModMenuIntegration
 import xyz.inorganic.quickmenu.ui.components.QuickMenuButton
+import xyz.inorganic.quickmenu.ui.popups.BreadcrumbPopupUI
 import java.util.Collections
 import kotlin.math.ceil
 
@@ -32,6 +33,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     private val buttonDataMap = mutableMapOf<QuickMenuButton, ActionButtonData>()
     private var isDraggingScrollbar = false
+    private var firstInit = true
 
     companion object {
         private val navigationStack = mutableListOf<ActionButtonData>()
@@ -47,6 +49,15 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     override fun init() {
         val config = QuickMenu.CONFIG
+        
+        // Reset navigation ONLY on initial open if keepNavigationHistory is false
+        if (firstInit) {
+            if (!config.keepNavigationHistory && navigationStack.isNotEmpty()) {
+                navigateRoot()
+            }
+            firstInit = false
+        }
+
         menuWidth = config.buttonsPerRow * 30 + 16
         menuHeight = 24 + config.visibleRows * 30 + 5
         menuX = (width - menuWidth) / 2
@@ -129,26 +140,30 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
 
         // Check breadcrumb clicks
-        var currentX = menuX + 10
         val y = menuY + 8
-        val rootWidth = font.width("Root")
-        if (event.x() >= currentX && event.x() <= currentX + rootWidth && event.y() >= y && event.y() <= y + 9) {
-            navigateToLevel(-1)
-            scrollOffset = 0
-            rebuildWidgets()
-            return true
-        }
-        currentX += rootWidth + 5
-        navigationStack.forEachIndexed { index, data ->
-            currentX += font.width(">") + 5
-            val nameWidth = font.width(data.name)
-            if (event.x() >= currentX && event.x() <= currentX + nameWidth && event.y() >= y && event.y() <= y + 9) {
-                navigateToLevel(index)
-                scrollOffset = 0
-                rebuildWidgets()
-                return true
+        val breadcrumbs = getBreadcrumbs()
+        breadcrumbs.forEach { (label, level, bounds) ->
+            if (event.x() >= bounds.first && event.x() <= bounds.second && event.y() >= y && event.y() <= y + 9) {
+                if (level == -2) { // "..."
+                    val visibleLevels = breadcrumbs.map { it.level }.toSet()
+                    val omitted = navigationStack.mapIndexedNotNull { index, data ->
+                        if (!visibleLevels.contains(index)) index to data.name else null
+                    }
+                    if (omitted.isNotEmpty()) {
+                        minecraft?.setScreen(BreadcrumbPopupUI(omitted, { 
+                            navigateToLevel(it)
+                            scrollOffset = 0
+                            rebuildWidgets()
+                        }, this))
+                    }
+                    return true
+                } else {
+                    navigateToLevel(level)
+                    scrollOffset = 0
+                    rebuildWidgets()
+                    return true
+                }
             }
-            currentX += nameWidth + 5
         }
 
         return super.mouseClicked(event, doubleClick)
@@ -181,6 +196,27 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         scrollOffset = (scrollOffset - (verticalAmount * rowHeight).toInt()).coerceIn(0, maxScroll)
         rebuildWidgets()
         return true
+    }
+
+    private fun isKeyDown(keyName: String): Boolean {
+        val window = Minecraft.getInstance().window
+        return try {
+            val key = InputConstants.getKey(keyName)
+            if (key == InputConstants.UNKNOWN) return false
+            
+            if (key.type == InputConstants.Type.MOUSE) {
+                when (key.value) {
+                    0 -> Minecraft.getInstance().mouseHandler.isLeftPressed
+                    1 -> Minecraft.getInstance().mouseHandler.isRightPressed
+                    2 -> Minecraft.getInstance().mouseHandler.isMiddlePressed
+                    else -> false
+                }
+            } else {
+                InputConstants.isKeyDown(window, key.value)
+            }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
@@ -223,45 +259,117 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
 
         if (editMode) {
-            val window = Minecraft.getInstance().window
-            val isShiftDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT)
-            val isCtrlDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL)
+            val isDeleteDown = isKeyDown(QuickMenu.CONFIG.deleteModifier)
+            val isMoveDown = isKeyDown(QuickMenu.CONFIG.moveModifier)
 
             buttonDataMap.keys.forEach { btn ->
                 if (btn.isHovered) {
-                    if (isShiftDown) renderIndicator(guiGraphics, btn, 0xFFFF0000.toInt(), "×")
-                    else if (isCtrlDown) renderIndicator(guiGraphics, btn, 0xFF00AAFF.toInt(), "↔")
+                    if (isDeleteDown) renderIndicator(guiGraphics, btn, 0xFFFF0000.toInt(), "×")
+                    else if (isMoveDown) renderIndicator(guiGraphics, btn, 0xFF00AAFF.toInt(), "↔")
                 }
             }
         }
     }
 
-    private fun renderBreadcrumbs(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int) {
+    data class BreadcrumbItem(val label: String, val level: Int, val bounds: Pair<Int, Int>)
+
+    private fun getBreadcrumbs(): List<BreadcrumbItem> {
+        val maxWidth = menuWidth - 30 // Padding for icons
         var currentX = menuX + 10
+        
+        // 1. Calculate full path widths
+        val rootWidth = font.width("Root")
+        var totalWidth = currentX + rootWidth + 5
+        
+        val allItems = navigationStack.mapIndexed { index, data ->
+            val label = data.name
+            val w = font.width("> $label")
+            val itemWidth = w + 5
+            totalWidth += itemWidth
+            Triple(label, index, w)
+        }
+        
+        // 2. If it fits, return full path
+        if (totalWidth <= menuX + maxWidth) {
+            val result = mutableListOf<BreadcrumbItem>()
+            var x = currentX
+            result.add(BreadcrumbItem("Root", -1, x to (x + rootWidth)))
+            x += rootWidth + 5
+            allItems.forEach { (label, index, w) ->
+                result.add(BreadcrumbItem(label, index, x to (x + w)))
+                x += w + 5
+            }
+            return result
+        }
+        
+        // 3. Truncation logic: Root > ... > [as many as fit from end]
+        val result = mutableListOf<BreadcrumbItem>()
+        var x = currentX
+        
+        // Add Root
+        result.add(BreadcrumbItem("Root", -1, x to (x + rootWidth)))
+        x += rootWidth + 5
+        
+        // Add "..."
+        val dotsW = font.width("> ...")
+        result.add(BreadcrumbItem("...", -2, x to (x + dotsW)))
+        x += dotsW + 5
+        
+        // Add trailing items greedily from the end
+        val availableWidth = (menuX + maxWidth) - x
+        val trailingItems = mutableListOf<BreadcrumbItem>()
+        var usedTrailingWidth = 0
+        
+        for (i in allItems.indices.reversed()) {
+            val (label, index, w) = allItems[i]
+            if (usedTrailingWidth + w + 5 <= availableWidth) {
+                trailingItems.add(0, BreadcrumbItem(label, index, 0 to 0)) // Bounds set below
+                usedTrailingWidth += w + 5
+            } else {
+                break
+            }
+        }
+        
+        // If even the last item doesn't fit, force show it (better than nothing)
+        if (trailingItems.isEmpty() && allItems.isNotEmpty()) {
+            val (label, index, w) = allItems.last()
+            trailingItems.add(BreadcrumbItem(label, index, 0 to 0))
+        }
+        
+        // Calculate final bounds for trailing items
+        trailingItems.forEach { item ->
+            val w = font.width("> ${item.label}")
+            val finalItem = item.copy(bounds = x to (x + w))
+            result.add(finalItem)
+            x += w + 5
+        }
+        
+        return result
+    }
+
+    private fun renderBreadcrumbs(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int) {
         val y = menuY + 8
+        val breadcrumbs = getBreadcrumbs()
         
-        // Root
-        val rootLabel = "Root"
-        val rootWidth = font.width(rootLabel)
-        val isRootHovered = mouseX >= currentX && mouseX <= currentX + rootWidth && mouseY >= y && mouseY <= y + 9
-        val rootColor = if (navigationStack.isEmpty()) -1 else if (isRootHovered) 0xFFFFFFFF.toInt() else 0xFFAAAAAA.toInt()
-        guiGraphics.drawString(font, rootLabel, currentX, y, rootColor, true)
-        currentX += rootWidth + 5
-        
-        navigationStack.forEachIndexed { index, data ->
-            // Separator
-            guiGraphics.drawString(font, ">", currentX, y, 0xFF666666.toInt(), true)
-            currentX += font.width(">") + 5
+        breadcrumbs.forEach { (label, level, bounds) ->
+            val isRoot = level == -1
+            val isDots = level == -2
+            val displayText = if (isRoot) label else "> $label"
             
-            // Folder name
-            val nameWidth = font.width(data.name)
-            val isHovered = mouseX >= currentX && mouseX <= currentX + nameWidth && mouseY >= y && mouseY <= y + 9
-            val isLast = index == navigationStack.size - 1
-            val color = if (isLast) -1 else if (isHovered) 0xFFFFFFFF.toInt() else 0xFFAAAAAA.toInt()
-            guiGraphics.drawString(font, data.name, currentX, y, color, true)
-            currentX += nameWidth + 5
+            val isHovered = mouseX >= bounds.first && mouseX <= bounds.second && mouseY >= y && mouseY <= y + 9
+            val isLast = level == navigationStack.size - 1
+            
+            val color = when {
+                isDots -> 0xFF666666.toInt()
+                isLast -> -1
+                isHovered -> 0xFFFFFFFF.toInt()
+                else -> 0xFFAAAAAA.toInt()
+            }
+            
+            guiGraphics.drawString(font, displayText, bounds.first, y, color, true)
         }
     }
+
 
     private fun renderIndicator(guiGraphics: GuiGraphics, btn: QuickMenuButton, color: Int, text: String) {
         val xSize = 10
@@ -279,14 +387,10 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun handleLeftClick(data: ActionButtonData) {
-        val window = Minecraft.getInstance().window
-        val isShiftDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_SHIFT) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_SHIFT)
-        val isCtrlDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL)
-
         if (editMode) {
-            if (isShiftDown) {
+            if (isKeyDown(QuickMenu.CONFIG.deleteModifier)) {
                 deleteAction(data)
-            } else if (isCtrlDown) {
+            } else if (isKeyDown(QuickMenu.CONFIG.moveModifier)) {
                 moveAction(data, -1)
             } else {
                 if (data.isFolder) {
@@ -312,10 +416,8 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     private fun handleRightClick(data: ActionButtonData) {
         if (!editMode) return
-        val window = Minecraft.getInstance().window
-        val isCtrlDown = InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL) || InputConstants.isKeyDown(window, GLFW.GLFW_KEY_RIGHT_CONTROL)
         
-        if (isCtrlDown) {
+        if (isKeyDown(QuickMenu.CONFIG.moveModifier)) {
             moveAction(data, 1)
         } else {
             // Right click ALWAYS opens editor in edit mode

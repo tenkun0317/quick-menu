@@ -53,8 +53,18 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
             if (rowY >= listStartY && rowY + 20 <= listStartY + maxVisibleHeight) {
                 if (action is CommandActionData) {
                     val cmdBox = EditBox(font, menuX + 10, rowY, 190, 20, Component.empty())
+                    
+                    // Dynamic limit helper
+                    fun updateLimit(text: String) {
+                        cmdBox.setMaxLength(if (text.startsWith("/")) 32767 else 256)
+                    }
+                    
+                    updateLimit(action.command)
                     cmdBox.value = action.command
-                    cmdBox.setResponder { actionButtonData.actions[index] = CommandActionData(it) }
+                    cmdBox.setResponder { 
+                        updateLimit(it)
+                        actionButtonData.actions[index] = CommandActionData(it) 
+                    }
                     addRenderableWidget(cmdBox)
                 } else if (action is KeybindActionData) {
                     val kbBtn = Button.builder(Component.literal("Key: ${Component.translatable(action.translationKey).string}")) {

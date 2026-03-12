@@ -43,7 +43,15 @@
   "text.config.quickmenu.option.closeOnAction": "実行時に閉じる",
   "text.config.quickmenu.option.closeOnKeyReleased": "キーを離したら閉じる",
   "text.config.quickmenu.option.hideEditIcon": "編集アイコンを非表示",
+  "text.config.quickmenu.option.keepNavigationHistory": "フォルダ階層を保持する",
+  "text.config.quickmenu.option.moveModifier": "移動に使用するキー",
+  "text.config.quickmenu.option.deleteModifier": "削除に使用するキー",
   "text.config.quickmenu.option.showActionsInTooltip": "ツールチップにアクションを表示",
+
+  "text.config.quickmenu.option.modifier.ctrl": "Ctrl",
+  "text.config.quickmenu.option.modifier.shift": "Shift",
+  "text.config.quickmenu.option.modifier.alt": "Alt",
+
   "text.config.quickmenu.option.displayRunText": "実行テキストの表示",
 
   "text.config.quickmenu.option.displayRunText.value.always": "常に表示",
