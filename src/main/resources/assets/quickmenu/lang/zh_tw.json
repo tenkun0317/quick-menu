@@ -1,0 +1,55 @@
+{
+  "key.category.quickmenu": "quickmenu",
+  "key.quickmenu.open": "打開 quickmenu",
+
+  "menu.main.title": "quickmenu",
+  "menu.main.no_actions": "尚未建立任何操作。",
+  "menu.main.button.add_action": "新增操作",
+  "menu.main.button.settings": "設定",
+
+  "menu.action_picker.title": "選擇操作類型",
+  "menu.action_picker.command": "command",
+  "menu.action_picker.keybind": "keybind",
+
+  "text.action.run_feedback": "已執行操作 \"%s\"",
+  "text.action.key": "Key: %s",
+  "menu.main.button.config": "設定",
+
+  "menu.action_picker.select": " > ",
+
+  "menu.editor.title": "操作編輯器",
+  "menu.editor.button.finish": "完成",
+  "menu.editor.button.cancel": "取消",
+  "menu.editor.actions": "操作",
+  "menu.editor.advanced": "進階",
+  "menu.editor.not_bound": "未綁定",
+
+  "menu.editor.property.name": "名稱",
+  "menu.editor.property.icon": "圖示",
+  "menu.editor.property.keybind": "keybind",
+  "menu.editor.property.custommodeldata": "自訂模型資料",
+  "menu.editor.property.new_action": "新增操作",
+
+  "text.config.quickmenu.title": "quickmenu 設定",
+
+  "text.config.quickmenu.section.menu": "選單",
+  "text.config.quickmenu.section.action_buttons": "操作按鈕",
+
+  "text.config.quickmenu.option.buttonsPerRow": "每列按鈕數量",
+  "text.config.quickmenu.option.visibleRows": "可見列數",
+  "text.config.quickmenu.option.closeOnAction": "執行操作後關閉",
+  "text.config.quickmenu.option.closeOnKeyReleased": "釋放按鍵時關閉",
+  "text.config.quickmenu.option.hideEditIcon": "隱藏編輯圖示",
+  "text.config.quickmenu.option.keepNavigationHistory": "保留資料夾導覽",
+  "text.config.quickmenu.option.moveModifier": "移動按鈕修飾鍵",
+  "text.config.quickmenu.option.deleteModifier": "刪除按鈕修飾鍵",
+  "text.config.quickmenu.option.showActionsInTooltip": "在提示中顯示操作",
+
+  "text.config.quickmenu.option.modifier.ctrl": "Ctrl",
+  "text.config.quickmenu.option.modifier.shift": "Shift",
+  "text.config.quickmenu.option.modifier.alt": "Alt",
+
+  "text.config.quickmenu.option.displayRunText.value.always": "始終",
+  "text.config.quickmenu.option.displayRunText.value.keybind_only": "僅 keybind",
+  "text.config.quickmenu.option.displayRunText.value.never": "從不"
+}
