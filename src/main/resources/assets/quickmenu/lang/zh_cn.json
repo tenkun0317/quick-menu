@@ -3,6 +3,10 @@
   "key.quickmenu.open": "打开 quickmenu",
   "key.quickmenu.move_modifier": "移动修饰键",
   "key.quickmenu.delete_modifier": "删除修饰键",
+  "key.quickmenu.search": "搜索",
+  "key.quickmenu.edit_mode": "编辑模式",
+  "key.quickmenu.navigate_back": "返回",
+  "key.quickmenu.close_search": "关闭搜索",
 
   "menu.main.title": "quickmenu",
   "menu.main.no_actions": "未创建任何操作。",

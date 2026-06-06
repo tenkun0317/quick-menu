@@ -42,3 +42,4 @@ replay_*.log
 
 .kotlin/
 porting_guide.md
+plan.md

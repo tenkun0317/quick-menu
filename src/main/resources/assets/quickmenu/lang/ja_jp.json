@@ -3,6 +3,10 @@
   "key.quickmenu.open": "メニューを開く",
   "key.quickmenu.move_modifier": "移動用修飾キー",
   "key.quickmenu.delete_modifier": "削除用修飾キー",
+  "key.quickmenu.search": "検索",
+  "key.quickmenu.edit_mode": "編集モード",
+  "key.quickmenu.navigate_back": "戻る",
+  "key.quickmenu.close_search": "検索を閉じる",
 
 
   "menu.main.title": "Quick Menu",

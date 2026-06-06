@@ -37,5 +37,8 @@
 		"java": ">=25",
 		"fabric-api": "*",
 		"fabric-language-kotlin": ">=1.13.0"
+	},
+	"recommends": {
+		"yet_another_config_lib_v3": "*"
 	}
 }

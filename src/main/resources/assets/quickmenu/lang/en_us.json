@@ -3,6 +3,10 @@
   "key.quickmenu.open": "Open Menu",
   "key.quickmenu.move_modifier": "Move Button Modifier",
   "key.quickmenu.delete_modifier": "Delete Button Modifier",
+  "key.quickmenu.search": "Search",
+  "key.quickmenu.edit_mode": "Edit Mode",
+  "key.quickmenu.navigate_back": "Navigate Back",
+  "key.quickmenu.close_search": "Close Search",
 
 
   "menu.main.title": "Quick Menu",

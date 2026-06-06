@@ -3,6 +3,10 @@
   "key.quickmenu.open": "打開 quickmenu",
   "key.quickmenu.move_modifier": "移動修飾鍵",
   "key.quickmenu.delete_modifier": "刪除修飾鍵",
+  "key.quickmenu.search": "搜尋",
+  "key.quickmenu.edit_mode": "編輯模式",
+  "key.quickmenu.navigate_back": "返回",
+  "key.quickmenu.close_search": "關閉搜尋",
 
   "menu.main.title": "quickmenu",
   "menu.main.no_actions": "尚未建立任何操作。",

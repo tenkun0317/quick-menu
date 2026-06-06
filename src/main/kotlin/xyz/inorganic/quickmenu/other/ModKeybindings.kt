@@ -10,6 +10,10 @@ object ModKeybindings {
     lateinit var menuOpenKeybinding: KeyMapping
     lateinit var moveModifierKeybind: KeyMapping
     lateinit var deleteModifierKeybind: KeyMapping
+    lateinit var searchKeybind: KeyMapping
+    lateinit var editModeKeybind: KeyMapping
+    lateinit var navigateBackKeybind: KeyMapping
+    lateinit var closeSearchKeybind: KeyMapping
 
     fun initialize() {
         val mainCategory = KeyMapping.Category(
@@ -39,6 +43,42 @@ object ModKeybindings {
                 "key.quickmenu.delete_modifier",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_LEFT_SHIFT,
+                mainCategory
+            )
+        )
+
+        searchKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.quickmenu.search",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_F,
+                mainCategory
+            )
+        )
+
+        editModeKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.quickmenu.edit_mode",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_E,
+                mainCategory
+            )
+        )
+
+        navigateBackKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.quickmenu.navigate_back",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_BACKSPACE,
+                mainCategory
+            )
+        )
+
+        closeSearchKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.quickmenu.close_search",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_ESCAPE,
                 mainCategory
             )
         )
