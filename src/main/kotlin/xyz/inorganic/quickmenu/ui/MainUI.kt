@@ -11,62 +11,53 @@ import net.minecraft.network.chat.Component
 import org.lwjgl.glfw.GLFW
 import xyz.inorganic.quickmenu.QuickMenu
 import xyz.inorganic.quickmenu.data.ActionButtonData
-import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
 import xyz.inorganic.quickmenu.other.ModKeybindings
 import xyz.inorganic.quickmenu.other.ModMenuIntegration
 import xyz.inorganic.quickmenu.ui.components.ActionButtonGrid
 import xyz.inorganic.quickmenu.ui.components.BreadcrumbRenderer
-import xyz.inorganic.quickmenu.ui.components.ConfirmScreen
 import xyz.inorganic.quickmenu.ui.components.MenuScrollHandler
 import xyz.inorganic.quickmenu.ui.components.SearchHandler
 import xyz.inorganic.quickmenu.ui.popups.BreadcrumbPopupUI
-import java.util.Collections
 import kotlin.math.ceil
 
 class MainUI : Screen(Component.translatable("menu.main.title")) {
     var editMode = false
     private var isSearching = false
-    private var menuX = 0
-    private var menuY = 0
-    private var menuWidth = 0
-    private var menuHeight = 0
-    private var firstInit = true
+    private val firstInit = true
 
-    private lateinit var menuBackground: xyz.inorganic.quickmenu.ui.surfaces.MenuBackground
-    private lateinit var scrollHandler: MenuScrollHandler
-    private lateinit var breadcrumbRenderer: BreadcrumbRenderer
-    private lateinit var actionButtonGrid: ActionButtonGrid
-    private lateinit var searchHandler: SearchHandler
+    private val menuWidth: Int get() = QuickMenu.CONFIG.buttonsPerRow * 30 + 16
+    private val menuHeight: Int get() = 24 + QuickMenu.CONFIG.visibleRows * 30 + 5
+    private val menuX: Int get() = (width - menuWidth) / 2
+    private val menuY: Int get() = (height - menuHeight) / 2
+
+    private val menuBackground by lazy { xyz.inorganic.quickmenu.ui.surfaces.MenuBackground(menuX, menuY, menuWidth, menuHeight) }
+    private val scrollHandler by lazy { MenuScrollHandler(
+        rowHeight = 30,
+        visibleRows = { QuickMenu.CONFIG.visibleRows },
+        buttonsPerRow = { QuickMenu.CONFIG.buttonsPerRow },
+        getTotalItems = { getCurrentActions().size }
+    ) }
+    private val breadcrumbRenderer by lazy { BreadcrumbRenderer(font, menuX, menuY, menuWidth) }
+    private val actionButtonGrid by lazy { ActionButtonGrid() }
+    private val searchHandler by lazy { SearchHandler { scrollHandler.reset() } }
+    private val actionManager by lazy { ActionManager { scrollHandler.reset(); rebuildWidgets() } }
+    private val keyEventHandler by lazy { KeyEventHandler(
+        onSearchToggle = { isSearching = !isSearching },
+        onEditModeToggle = { editMode = !editMode },
+        onNavigateBack = { navigateBack() },
+        onSearchClear = { searchHandler.clear() },
+        onRebuild = { rebuildWidgets() }
+    ) }
 
     override fun init() {
-        val config = QuickMenu.CONFIG
-
-        if (firstInit) {
-            if (!config.keepNavigationHistory && NavigationState.depth() > 0) {
-                NavigationState.navigateRoot()
-            }
-            firstInit = false
+        if (firstInit && !QuickMenu.CONFIG.keepNavigationHistory && NavigationState.depth() > 0) {
+            NavigationState.navigateRoot()
         }
 
-        menuWidth = config.buttonsPerRow * 30 + 16
-        menuHeight = 24 + config.visibleRows * 30 + 5
-        menuX = (width - menuWidth) / 2
-        menuY = (height - menuHeight) / 2
-
-        menuBackground = xyz.inorganic.quickmenu.ui.surfaces.MenuBackground(menuX, menuY, menuWidth, menuHeight)
-        breadcrumbRenderer = BreadcrumbRenderer(font, menuX, menuY, menuWidth)
-        actionButtonGrid = ActionButtonGrid()
-        searchHandler = SearchHandler { scrollHandler.reset() }
-
-        scrollHandler = MenuScrollHandler(
-            rowHeight = 30,
-            visibleRows = { QuickMenu.CONFIG.visibleRows },
-            buttonsPerRow = { QuickMenu.CONFIG.buttonsPerRow },
-            getTotalItems = { getCurrentActions().size }
-        )
+        keyEventHandler.updateState(isSearching, editMode)
 
         if (isSearching) {
-            val existingValue = if (::searchHandler.isInitialized) searchHandler.getExistingValue() else ""
+            val existingValue = searchHandler.getExistingValue()
             val searchBox = searchHandler.createSearchBox(font, menuX + 8, menuY + 6, menuWidth - 50, 12, existingValue)
             addRenderableWidget(searchBox)
             setInitialFocus(searchBox)
@@ -74,11 +65,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         addToggleButtons()
 
-        val actions = if (isSearching) {
-            searchHandler.getFilteredActions()
-        } else {
-            NavigationState.getCurrentChildren()
-        }
+        val actions = getCurrentActions()
 
         val startX = menuX + 10
         val startY = menuY + 28
@@ -101,11 +88,10 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun addToggleButtons() {
-        val config = QuickMenu.CONFIG
         val toggleButtonsY = menuY + 4
         var currentToggleX = menuX + menuWidth - 22
 
-        if (!config.hideEditIcon) {
+        if (!QuickMenu.CONFIG.hideEditIcon) {
             addRenderableWidget(Button.builder(Component.literal(if (editMode) "×" else "✎")) {
                 editMode = !editMode
                 rebuildWidgets()
@@ -123,7 +109,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private fun addEditModeButtons() {
         val editorY = menuY + menuHeight + 8
         addRenderableWidget(Button.builder(Component.literal("+ Action")) {
-            gotoActionEditor(null)
+            openActionEditor(null)
         }.pos(menuX, editorY).size(menuWidth / 2 - 2, 20).build())
 
         addRenderableWidget(Button.builder(Component.literal("Settings")) {
@@ -158,29 +144,40 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         if (!isSearching) {
             val clickedLevel = breadcrumbRenderer.findClickedBreadcrumb(event.x().toDouble(), event.y().toDouble())
             if (clickedLevel != null) {
-                if (clickedLevel == -2) {
-                    val breadcrumbs = breadcrumbRenderer.getBreadcrumbs()
-                    val visibleLevels = breadcrumbs.map { it.level }.toSet()
-                    val omitted = NavigationState.getStackItems().mapIndexedNotNull { index, data ->
-                        if (!visibleLevels.contains(index)) index to data.second.name else null
-                    }
-                    if (omitted.isNotEmpty()) {
-                        minecraft?.setScreen(BreadcrumbPopupUI(omitted, {
-                            NavigationState.navigateToLevel(it)
-                            scrollHandler.reset()
-                            rebuildWidgets()
-                        }, this))
-                    }
-                } else {
-                    NavigationState.navigateToLevel(clickedLevel)
-                    scrollHandler.reset()
-                    rebuildWidgets()
-                }
+                handleBreadcrumbClick(clickedLevel)
                 return true
             }
         }
 
         return super.mouseClicked(event, doubleClick)
+    }
+
+    private fun handleBreadcrumbClick(level: Int) {
+        if (level == -2) {
+            val breadcrumbs = breadcrumbRenderer.getBreadcrumbs()
+            val visibleLevels = breadcrumbs.map { it.level }.toSet()
+            val omitted = NavigationState.getStackItems().mapIndexedNotNull { index, data ->
+                if (!visibleLevels.contains(index)) index to data.second.name else null
+            }
+            if (omitted.isNotEmpty()) {
+                minecraft?.setScreen(BreadcrumbPopupUI(omitted, {
+                    navigateToFolderLevel(it)
+                }, this))
+            }
+        } else {
+            navigateToFolderLevel(level)
+        }
+    }
+
+    private fun navigateToFolderLevel(level: Int) {
+        NavigationState.navigateToLevel(level)
+        scrollHandler.reset()
+        rebuildWidgets()
+    }
+
+    private fun navigateBack() {
+        NavigationState.navigateBack()
+        scrollHandler.reset()
     }
 
     override fun mouseDragged(event: MouseButtonEvent, deltaX: Double, deltaY: Double): Boolean {
@@ -209,22 +206,6 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         return true
     }
 
-    private fun isKeyMappingDown(keyMapping: net.minecraft.client.KeyMapping): Boolean {
-        val keyBindingMixin = keyMapping as xyz.inorganic.quickmenu.mixins.KeyBindingMixin
-        val key = keyBindingMixin.getKey()
-        val client = Minecraft.getInstance()
-        return if (key.type == InputConstants.Type.MOUSE) {
-            when (key.value) {
-                0 -> client.mouseHandler.isLeftPressed
-                1 -> client.mouseHandler.isRightPressed
-                2 -> client.mouseHandler.isMiddlePressed
-                else -> false
-            }
-        } else {
-            InputConstants.isKeyDown(client.window, key.value)
-        }
-    }
-
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
         menuBackground.renderBackground(graphics)
 
@@ -249,42 +230,33 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
 
         if (editMode) {
-            val isDeleteDown = isKeyMappingDown(ModKeybindings.deleteModifierKeybind)
-            val isMoveDown = isKeyMappingDown(ModKeybindings.moveModifierKeybind)
+            val isDeleteDown = keyEventHandler.isKeyMappingDown(ModKeybindings.deleteModifierKeybind)
+            val isMoveDown = keyEventHandler.isKeyMappingDown(ModKeybindings.moveModifierKeybind)
             actionButtonGrid.renderEditIndicators(graphics, font, isDeleteDown, isMoveDown)
         }
     }
 
     private fun handleLeftClick(data: ActionButtonData) {
         if (editMode) {
-            if (isKeyMappingDown(ModKeybindings.deleteModifierKeybind)) {
-                deleteAction(data)
-            } else if (isKeyMappingDown(ModKeybindings.moveModifierKeybind)) {
-                moveAction(data, -1)
-            } else {
-                if (data.isFolder) {
-                    if (isSearching) {
-                        isSearching = false
-                        searchHandler.clear()
-                    }
-                    NavigationState.navigateTo(data)
-                    scrollHandler.reset()
-                    rebuildWidgets()
-                } else {
-                    gotoActionEditor(data)
+            when {
+                keyEventHandler.isKeyMappingDown(ModKeybindings.deleteModifierKeybind) -> {
+                    actionManager.deleteAction(data, isSearching) { minecraft?.setScreen(this) }
+                }
+                keyEventHandler.isKeyMappingDown(ModKeybindings.moveModifierKeybind) -> {
+                    actionManager.moveAction(data, -1, isSearching)
+                }
+                data.isFolder -> {
+                    enterFolder(data)
+                }
+                else -> {
+                    openActionEditor(data)
                 }
             }
             return
         }
 
         if (data.isFolder) {
-            if (isSearching) {
-                isSearching = false
-                searchHandler.clear()
-            }
-            NavigationState.navigateTo(data)
-            scrollHandler.reset()
-            rebuildWidgets()
+            enterFolder(data)
         } else {
             data.run()
             if (QuickMenu.CONFIG.closeOnAction) minecraft?.setScreen(null)
@@ -294,55 +266,27 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private fun handleRightClick(data: ActionButtonData) {
         if (!editMode) return
 
-        if (isKeyMappingDown(ModKeybindings.moveModifierKeybind)) {
-            moveAction(data, 1)
-        } else {
-            gotoActionEditor(data)
-        }
-    }
-
-    private fun moveAction(data: ActionButtonData, direction: Int) {
-        if (isSearching) return
-        val actions = NavigationState.getCurrentChildren()
-        val index = actions.indexOf(data)
-        val newIndex = index + direction
-        if (newIndex in 0 until actions.size) {
-            Collections.swap(actions, index, newIndex)
-            ActionButtonDataHandler.save()
-            rebuildWidgets()
-        }
-    }
-
-    private fun deleteAction(data: ActionButtonData) {
-        val confirmScreen = ConfirmScreen({ confirmed ->
-            if (confirmed) {
-                performDelete(data)
+        when {
+            keyEventHandler.isKeyMappingDown(ModKeybindings.moveModifierKeybind) -> {
+                actionManager.moveAction(data, 1, isSearching)
             }
-            minecraft?.setScreen(this)
-        }, Component.translatable("menu.main.delete.confirm.title"), Component.translatable("menu.main.delete.confirm.message", data.name))
-        minecraft?.setScreen(confirmScreen)
+            else -> {
+                openActionEditor(data)
+            }
+        }
     }
 
-    private fun performDelete(data: ActionButtonData) {
+    private fun enterFolder(folder: ActionButtonData) {
         if (isSearching) {
-            fun findAndDelete(list: MutableList<ActionButtonData>): Boolean {
-                if (list.remove(data)) return true
-                for (action in list) {
-                    if (action.isFolder && findAndDelete(action.children)) return true
-                }
-                return false
-            }
-            findAndDelete(ActionButtonDataHandler.actions)
-        } else {
-            val actions = NavigationState.getCurrentChildren()
-            actions.remove(data)
+            isSearching = false
+            searchHandler.clear()
         }
-
-        ActionButtonDataHandler.save()
+        NavigationState.navigateTo(folder)
+        scrollHandler.reset()
         rebuildWidgets()
     }
 
-    private fun gotoActionEditor(action: ActionButtonData?) {
+    private fun openActionEditor(action: ActionButtonData?) {
         val actionEditor = ActionEditorUI(action)
         actionEditor.previousScreen = this
         minecraft?.setScreen(actionEditor)
@@ -357,38 +301,16 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     override fun keyPressed(event: KeyEvent): Boolean {
-        if (event.key() == GLFW.GLFW_KEY_F && (event.modifiers() and GLFW.GLFW_MOD_CONTROL != 0)) {
-            isSearching = !isSearching
-            if (!isSearching) searchHandler.clear()
-            rebuildWidgets()
-            return true
-        }
-        if (event.key() == GLFW.GLFW_KEY_E) {
-            editMode = !editMode
-            rebuildWidgets()
-            return true
-        }
-        if (event.key() == GLFW.GLFW_KEY_BACKSPACE && NavigationState.currentFolder() != null && !isSearching) {
-            NavigationState.navigateBack()
-            scrollHandler.reset()
-            rebuildWidgets()
-            return true
-        }
-        if (event.key() == GLFW.GLFW_KEY_ESCAPE && isSearching) {
-            isSearching = false
-            searchHandler.clear()
-            rebuildWidgets()
+        if (keyEventHandler.handleKeyPressed(event)) {
             return true
         }
         return super.keyPressed(event)
     }
 
     override fun keyReleased(event: KeyEvent): Boolean {
-        if (!editMode && QuickMenu.CONFIG.closeOnKeyReleased) {
-            if (ModKeybindings.menuOpenKeybinding.matches(event)) {
-                handleReleaseAction()
-                return true
-            }
+        if (keyEventHandler.handleKeyReleased(event, QuickMenu.CONFIG.closeOnKeyReleased)) {
+            handleReleaseAction()
+            return true
         }
         return super.keyReleased(event)
     }
