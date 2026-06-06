@@ -15,6 +15,7 @@ import com.mojang.blaze3d.platform.InputConstants
 import org.lwjgl.glfw.GLFW
 import xyz.inorganic.quickmenu.data.ActionButtonData
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
+import xyz.inorganic.quickmenu.ui.components.ConfirmScreen
 import xyz.inorganic.quickmenu.ui.components.QuickMenuButton
 import xyz.inorganic.quickmenu.ui.popups.ItemPickerUI
 
@@ -180,7 +181,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
         syncInputToData()
         actionButtonData.keybind = if (isBoundKeybind) keybind.toMutableList() else mutableListOf()
 
-        val parentList = MainUI.currentFolder()?.children ?: ActionButtonDataHandler.actions
+        val parentList = NavigationState.getCurrentChildren()
 
         if (isNewAction) {
             parentList.add(actionButtonData)
@@ -266,22 +267,4 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
     }
 
     override fun isPauseScreen(): Boolean = false
-
-    class ConfirmScreen(val callback: (Boolean) -> Unit, title: Component, val message: Component) : Screen(title) {
-        override fun init() {
-            addRenderableWidget(Button.builder(Component.literal("Yes")) {
-                callback(true)
-            }.pos(width / 2 - 105, height / 2 + 10).size(100, 20).build())
-
-            addRenderableWidget(Button.builder(Component.literal("No")) {
-                callback(false)
-            }.pos(width / 2 + 5, height / 2 + 10).size(100, 20).build())
-        }
-        override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
-            graphics.fill(0, 0, width, height, 0xCC000000.toInt())
-            graphics.centeredText(font, title, width / 2, height / 2 - 30, -1)
-            graphics.centeredText(font, message, width / 2, height / 2 - 15, -1)
-            super.extractRenderState(graphics, mouseX, mouseY, delta)
-        }
-    }
 }
