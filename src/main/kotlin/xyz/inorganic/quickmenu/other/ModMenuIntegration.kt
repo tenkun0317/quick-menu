@@ -1,6 +1,5 @@
 package xyz.inorganic.quickmenu.other
 
-import com.mojang.blaze3d.platform.InputConstants
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
 import dev.isxander.yacl3.api.ConfigCategory
@@ -59,14 +58,6 @@ class ModMenuIntegration : ModMenuApi {
                     .name(Component.translatable("text.config.quickmenu.option.keepNavigationHistory"))
                     .controller { BooleanControllerBuilder.create(it) }
                     .binding(false, { config.keepNavigationHistory }, { config.keepNavigationHistory = it })
-                    .build())
-                .option(Option.createBuilder<String>()
-                    .name(Component.translatable("text.config.quickmenu.option.moveModifier"))
-                    .binding(config.moveModifier, { config.moveModifier }, { config.moveModifier = it })
-                    .build())
-                .option(Option.createBuilder<String>()
-                    .name(Component.translatable("text.config.quickmenu.option.deleteModifier"))
-                    .binding(config.deleteModifier, { config.deleteModifier }, { config.deleteModifier = it })
                     .build())
                 .build())
             .category(ConfigCategory.createBuilder()

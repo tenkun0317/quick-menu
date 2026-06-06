@@ -1,11 +1,15 @@
 {
-  "key.category.quickmenu": "quickmenu",
+  "key.category.quickmenu.main": "quickmenu",
   "key.quickmenu.open": "打开 quickmenu",
+  "key.quickmenu.move_modifier": "移动修饰键",
+  "key.quickmenu.delete_modifier": "删除修饰键",
 
   "menu.main.title": "quickmenu",
   "menu.main.no_actions": "未创建任何操作。",
   "menu.main.button.add_action": "添加操作",
   "menu.main.button.settings": "设置",
+  "menu.main.delete.confirm.title": "确认删除",
+  "menu.main.delete.confirm.message": "删除「%s」？",
 
   "menu.action_picker.title": "选择操作类型",
   "menu.action_picker.command": "command",

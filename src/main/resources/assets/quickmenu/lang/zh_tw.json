@@ -1,11 +1,15 @@
 {
-  "key.category.quickmenu": "quickmenu",
+  "key.category.quickmenu.main": "quickmenu",
   "key.quickmenu.open": "打開 quickmenu",
+  "key.quickmenu.move_modifier": "移動修飾鍵",
+  "key.quickmenu.delete_modifier": "刪除修飾鍵",
 
   "menu.main.title": "quickmenu",
   "menu.main.no_actions": "尚未建立任何操作。",
   "menu.main.button.add_action": "新增操作",
   "menu.main.button.settings": "設定",
+  "menu.main.delete.confirm.title": "確認刪除",
+  "menu.main.delete.confirm.message": "刪除「%s」？",
 
   "menu.action_picker.title": "選擇操作類型",
   "menu.action_picker.command": "command",

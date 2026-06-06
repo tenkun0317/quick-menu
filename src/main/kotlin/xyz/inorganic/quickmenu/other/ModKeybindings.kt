@@ -8,6 +8,8 @@ import org.lwjgl.glfw.GLFW
 
 object ModKeybindings {
     lateinit var menuOpenKeybinding: KeyMapping
+    lateinit var moveModifierKeybind: KeyMapping
+    lateinit var deleteModifierKeybind: KeyMapping
 
     fun initialize() {
         val mainCategory = KeyMapping.Category(
@@ -19,6 +21,24 @@ object ModKeybindings {
                 "key.quickmenu.open",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_G,
+                mainCategory
+            )
+        )
+
+        moveModifierKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.quickmenu.move_modifier",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_LEFT_CONTROL,
+                mainCategory
+            )
+        )
+
+        deleteModifierKeybind = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.quickmenu.delete_modifier",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_LEFT_SHIFT,
                 mainCategory
             )
         )

@@ -24,7 +24,7 @@ class ModConfig {
     
     var keepNavigationHistory: Boolean = false
 
-    // Edit mode modifiers (Stored as InputConstants.Key.name)
+    // Edit mode modifiers (Stored as key name strings)
     var moveModifier: String = "key.keyboard.left.control"
     var deleteModifier: String = "key.keyboard.left.shift"
 

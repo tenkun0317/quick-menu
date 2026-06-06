@@ -1,12 +1,16 @@
 {
-  "key.category.quickmenu": "クイックメニュー",
+  "key.category.quickmenu.main": "Quick Menu",
   "key.quickmenu.open": "メニューを開く",
+  "key.quickmenu.move_modifier": "移動用修飾キー",
+  "key.quickmenu.delete_modifier": "削除用修飾キー",
 
 
-  "menu.main.title": "クイックメニュー",
+  "menu.main.title": "Quick Menu",
   "menu.main.no_actions": "アクションが作成されていません。",
   "menu.main.button.add_action": "アクションを追加",
   "menu.main.button.settings": "設定",
+  "menu.main.delete.confirm.title": "削除の確認",
+  "menu.main.delete.confirm.message": "「%s」を削除しますか？",
 
   "menu.action_picker.title": "アクションの種類を選択",
   "menu.action_picker.command": "コマンド",

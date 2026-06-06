@@ -278,6 +278,22 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
     }
 
+    private fun isKeyMappingDown(keyMapping: net.minecraft.client.KeyMapping): Boolean {
+        val keyBindingMixin = keyMapping as xyz.inorganic.quickmenu.mixins.KeyBindingMixin
+        val key = keyBindingMixin.getKey()
+        val client = Minecraft.getInstance()
+        return if (key.type == InputConstants.Type.MOUSE) {
+            when (key.value) {
+                0 -> client.mouseHandler.isLeftPressed
+                1 -> client.mouseHandler.isRightPressed
+                2 -> client.mouseHandler.isMiddlePressed
+                else -> false
+            }
+        } else {
+            InputConstants.isKeyDown(client.window, key.value)
+        }
+    }
+
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
         graphics.fill(menuX - 1, menuY - 1, menuX + menuWidth + 1, menuY + menuHeight + 1, 0x44000000.toInt())
         graphics.fill(menuX, menuY, menuX + menuWidth, menuY + menuHeight, 0xCC121212.toInt())
@@ -328,8 +344,8 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
 
         if (editMode) {
-            val isDeleteDown = isKeyDown(QuickMenu.CONFIG.deleteModifier)
-            val isMoveDown = isKeyDown(QuickMenu.CONFIG.moveModifier)
+            val isDeleteDown = isKeyMappingDown(ModKeybindings.deleteModifierKeybind)
+            val isMoveDown = isKeyMappingDown(ModKeybindings.moveModifierKeybind)
 
             buttonDataMap.keys.forEach { btn ->
                 if (btn.isHovered) {
@@ -448,9 +464,9 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     private fun handleLeftClick(data: ActionButtonData) {
         if (editMode) {
-            if (isKeyDown(QuickMenu.CONFIG.deleteModifier)) {
+            if (isKeyMappingDown(ModKeybindings.deleteModifierKeybind)) {
                 deleteAction(data)
-            } else if (isKeyDown(QuickMenu.CONFIG.moveModifier)) {
+            } else if (isKeyMappingDown(ModKeybindings.moveModifierKeybind)) {
                 moveAction(data, -1)
             } else {
                 if (data.isFolder) {
@@ -485,7 +501,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private fun handleRightClick(data: ActionButtonData) {
         if (!editMode) return
 
-        if (isKeyDown(QuickMenu.CONFIG.moveModifier)) {
+        if (isKeyMappingDown(ModKeybindings.moveModifierKeybind)) {
             moveAction(data, 1)
         } else {
             gotoActionEditor(data)
@@ -505,6 +521,16 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun deleteAction(data: ActionButtonData) {
+        val confirmScreen = ConfirmScreen({ confirmed ->
+            if (confirmed) {
+                performDelete(data)
+            }
+            minecraft?.setScreen(this)
+        }, Component.translatable("menu.main.delete.confirm.title"), Component.translatable("menu.main.delete.confirm.message", data.name))
+        minecraft?.setScreen(confirmScreen)
+    }
+
+    private fun performDelete(data: ActionButtonData) {
         if (isSearching) {
             fun findAndDelete(list: MutableList<ActionButtonData>): Boolean {
                 if (list.remove(data)) return true
@@ -576,4 +602,22 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     override fun isPauseScreen(): Boolean = false
+
+    class ConfirmScreen(val callback: (Boolean) -> Unit, title: Component, val message: Component) : Screen(title) {
+        override fun init() {
+            addRenderableWidget(Button.builder(Component.literal("Yes")) {
+                callback(true)
+            }.pos(width / 2 - 105, height / 2 + 10).size(100, 20).build())
+
+            addRenderableWidget(Button.builder(Component.literal("No")) {
+                callback(false)
+            }.pos(width / 2 + 5, height / 2 + 10).size(100, 20).build())
+        }
+        override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
+            graphics.fill(0, 0, width, height, 0xCC000000.toInt())
+            graphics.centeredText(font, title, width / 2, height / 2 - 30, -1)
+            graphics.centeredText(font, message, width / 2, height / 2 - 15, -1)
+            super.extractRenderState(graphics, mouseX, mouseY, delta)
+        }
+    }
 }
