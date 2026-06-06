@@ -5,17 +5,16 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
 import dev.isxander.yacl3.api.ConfigCategory
 import dev.isxander.yacl3.api.Option
-import dev.isxander.yacl3.api.OptionDescription
 import dev.isxander.yacl3.api.YetAnotherConfigLib
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder
 import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder
-import dev.isxander.yacl3.api.controller.KeyCodeControllerBuilder
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.QuickMenu
 
 class ModMenuIntegration : ModMenuApi {
-    override fun getModConfigScreenFactory(): ConfigScreenFactory<*> {
+    override fun getModConfigScreenFactory(): ConfigScreenFactory<Screen> {
         return ConfigScreenFactory { parent ->
             createConfigScreen(parent)
         }
@@ -30,62 +29,64 @@ class ModMenuIntegration : ModMenuApi {
                 .name(Component.translatable("text.config.quickmenu.section.menu"))
                 .option(Option.createBuilder<Int>()
                     .name(Component.translatable("text.config.quickmenu.option.buttonsPerRow"))
-                    .controller { IntegerFieldControllerBuilder.create(it, 1, 15) }
+                    .controller { opt ->
+                        IntegerFieldControllerBuilder.create(opt)
+                            .min(1)
+                            .max(15)
+                    }
                     .binding(5, { config.buttonsPerRow }, { config.buttonsPerRow = it })
                     .build())
                 .option(Option.createBuilder<Int>()
                     .name(Component.translatable("text.config.quickmenu.option.visibleRows"))
-                    .controller { IntegerFieldControllerBuilder.create(it, 1, 10) }
+                    .controller { opt ->
+                        IntegerFieldControllerBuilder.create(opt)
+                            .min(1)
+                            .max(10)
+                    }
                     .binding(2, { config.visibleRows }, { config.visibleRows = it })
                     .build())
                 .option(Option.createBuilder<Boolean>()
                     .name(Component.translatable("text.config.quickmenu.option.closeOnKeyReleased"))
-                    .controller { opt -> BooleanControllerBuilder.create(opt).yesNoFormatter().coloured(true) }
+                    .controller { BooleanControllerBuilder.create(it) }
                     .binding(false, { config.closeOnKeyReleased }, { config.closeOnKeyReleased = it })
                     .build())
                 .option(Option.createBuilder<Boolean>()
                     .name(Component.translatable("text.config.quickmenu.option.hideEditIcon"))
-                    .controller { opt -> BooleanControllerBuilder.create(opt).yesNoFormatter().coloured(true) }
+                    .controller { BooleanControllerBuilder.create(it) }
                     .binding(false, { config.hideEditIcon }, { config.hideEditIcon = it })
                     .build())
                 .option(Option.createBuilder<Boolean>()
                     .name(Component.translatable("text.config.quickmenu.option.keepNavigationHistory"))
-                    .controller { opt -> BooleanControllerBuilder.create(opt).yesNoFormatter().coloured(true) }
+                    .controller { BooleanControllerBuilder.create(it) }
                     .binding(false, { config.keepNavigationHistory }, { config.keepNavigationHistory = it })
                     .build())
-                .option(Option.createBuilder<InputConstants.Key>()
+                .option(Option.createBuilder<String>()
                     .name(Component.translatable("text.config.quickmenu.option.moveModifier"))
-                    .controller { KeyCodeControllerBuilder.create(it) }
-                    .binding(
-                        InputConstants.getKey("key.keyboard.left.control"),
-                        { InputConstants.getKey(config.moveModifier) },
-                        { config.moveModifier = it.name }
-                    )
+                    .binding(config.moveModifier, { config.moveModifier }, { config.moveModifier = it })
                     .build())
-                .option(Option.createBuilder<InputConstants.Key>()
+                .option(Option.createBuilder<String>()
                     .name(Component.translatable("text.config.quickmenu.option.deleteModifier"))
-                    .controller { KeyCodeControllerBuilder.create(it) }
-                    .binding(
-                        InputConstants.getKey("key.keyboard.left.shift"),
-                        { InputConstants.getKey(config.deleteModifier) },
-                        { config.deleteModifier = it.name }
-                    )
+                    .binding(config.deleteModifier, { config.deleteModifier }, { config.deleteModifier = it })
                     .build())
                 .build())
             .category(ConfigCategory.createBuilder()
                 .name(Component.translatable("text.config.quickmenu.section.action_buttons"))
                 .option(Option.createBuilder<Boolean>()
                     .name(Component.translatable("text.config.quickmenu.option.closeOnAction"))
-                    .controller { opt -> BooleanControllerBuilder.create(opt).yesNoFormatter().coloured(true) }
+                    .controller { BooleanControllerBuilder.create(it) }
                     .binding(true, { config.closeOnAction }, { config.closeOnAction = it })
                     .build())
                 .option(Option.createBuilder<Boolean>()
                     .name(Component.translatable("text.config.quickmenu.option.showActionsInTooltip"))
-                    .controller { opt -> BooleanControllerBuilder.create(opt).yesNoFormatter().coloured(true) }
+                    .controller { BooleanControllerBuilder.create(it) }
                     .binding(true, { config.showActionsInTooltip }, { config.showActionsInTooltip = it })
                     .build())
                 .option(Option.createBuilder<ModConfig.DisplayRunText>()
                     .name(Component.translatable("text.config.quickmenu.option.displayRunText"))
+                    .controller { opt ->
+                        EnumControllerBuilder.create(opt)
+                            .enumClass(ModConfig.DisplayRunText::class.java)
+                    }
                     .binding(ModConfig.DisplayRunText.KEYBIND_ONLY, { config.displayRunText }, { config.displayRunText = it })
                     .build())
                 .build())

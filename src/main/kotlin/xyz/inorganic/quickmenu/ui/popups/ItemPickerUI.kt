@@ -1,13 +1,12 @@
 package xyz.inorganic.quickmenu.ui.popups
 
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemStack
 import xyz.inorganic.quickmenu.ui.components.QuickMenuButton
-import xyz.inorganic.quickmenu.ui.surfaces.SwitcherSurface
 import java.util.function.Consumer
 import kotlin.math.ceil
 
@@ -21,7 +20,7 @@ class ItemPickerUI : Screen(Component.empty()) {
     private var menuY = 0
     private var menuWidth = 230
     private var menuHeight = 210
-    
+
     private var scrollOffset = 0
     private val buttonSize = 26
 
@@ -30,9 +29,9 @@ class ItemPickerUI : Screen(Component.empty()) {
         menuY = (height - menuHeight) / 2
 
         searchBox = EditBox(font, menuX + 10, menuY + 10, menuWidth - 20, 20, Component.empty())
-        searchBox.setResponder { 
+        searchBox.setResponder {
             scrollOffset = 0
-            updateItems() 
+            updateItems()
         }
         addRenderableWidget(searchBox)
 
@@ -56,15 +55,15 @@ class ItemPickerUI : Screen(Component.empty()) {
         items.forEachIndexed { index, item ->
             val row = index / rowSize
             val col = index % rowSize
-            
+
             val btnX = startX + col * buttonSize
             val btnY = startY + row * buttonSize - scrollOffset
-            
+
             if (btnY >= startY && btnY + buttonSize <= startY + visibleHeight) {
                 val stack = item.defaultInstance
                 val button = QuickMenuButton(stack, {
-                        selectedItem = stack
-                        onClose()
+                    selectedItem = stack
+                    onClose()
                 })
                 button.x = btnX
                 button.y = btnY
@@ -80,16 +79,16 @@ class ItemPickerUI : Screen(Component.empty()) {
         val totalRows = ceil(itemsCount.toDouble() / 8.0).toInt()
         val totalHeight = totalRows * buttonSize
         val visibleHeight = menuHeight - 50
-        
+
         val maxScroll = maxOf(0, totalHeight - visibleHeight)
         scrollOffset = (scrollOffset - (verticalAmount * buttonSize).toInt()).coerceIn(0, maxScroll)
         updateItems()
         return true
     }
 
-    override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
-        context.fill(menuX, menuY, menuX + menuWidth, menuY + menuHeight, 0xCC000000.toInt())
-        super.render(context, mouseX, mouseY, delta)
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
+        graphics.fill(menuX, menuY, menuX + menuWidth, menuY + menuHeight, 0xCC000000.toInt())
+        super.extractRenderState(graphics, mouseX, mouseY, delta)
     }
 
     override fun onClose() {

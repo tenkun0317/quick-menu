@@ -1,19 +1,20 @@
 package xyz.inorganic.quickmenu.ui.surfaces
 
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.resources.Identifier
 import kotlin.math.ceil
 
 object SwitcherSurface {
-    private val TEXTURE = Identifier.parse("quickmenu:textures/switcher_textures.png")
+    private val TEXTURE = Identifier.fromNamespaceAndPath("quickmenu", "textures/switcher_textures.png")
 
-    fun draw(context: GuiGraphics, x: Int, y: Int, width: Int, height: Int, isHeader: Boolean = false) {
+    fun draw(context: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int, isHeader: Boolean = false) {
         val sourceX = if (isHeader) 0 else 24
         drawNineSlicedTexture(context, x, y, width, height, sourceX, 0, 6, 6, 12, 12, 52, 50)
     }
 
     private fun drawNineSlicedTexture(
-        context: GuiGraphics, x: Int, y: Int, width: Int, height: Int,
+        context: GuiGraphicsExtractor, x: Int, y: Int, width: Int, height: Int,
         sourceX: Int, sourceY: Int, sideWidth: Int, sideHeight: Int,
         centerWidth: Int, centerHeight: Int, textureWidth: Int, textureHeight: Int
     ) {
@@ -29,14 +30,14 @@ object SwitcherSurface {
     }
 
     private fun drawTexture(
-        context: GuiGraphics, x: Int, y: Int, sourceX: Int, sourceY: Int,
+        context: GuiGraphicsExtractor, x: Int, y: Int, sourceX: Int, sourceY: Int,
         sourceWidth: Int, sourceHeight: Int, textureWidth: Int, textureHeight: Int
     ) {
-        context.blit(TEXTURE, x, y, sourceX, sourceY, sourceWidth.toFloat(), sourceHeight.toFloat(), textureWidth.toFloat(), textureHeight.toFloat())
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, sourceX.toFloat(), sourceY.toFloat(), sourceWidth, sourceHeight, textureWidth, textureHeight)
     }
 
     private fun drawRepeatingTexture(
-        context: GuiGraphics, x: Int, y: Int, sourceX: Int, sourceY: Int,
+        context: GuiGraphicsExtractor, x: Int, y: Int, sourceX: Int, sourceY: Int,
         sourceWidth: Int, sourceHeight: Int, textureWidth: Int, textureHeight: Int, width: Int, height: Int
     ) {
         if (width <= 0 || height <= 0) return

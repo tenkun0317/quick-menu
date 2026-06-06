@@ -1,13 +1,12 @@
 package xyz.inorganic.quickmenu.ui.popups
 
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.data.command_actions.ActionData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
-import xyz.inorganic.quickmenu.ui.surfaces.SwitcherSurface
 import java.util.function.Consumer
 
 class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")) {
@@ -24,7 +23,7 @@ class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")
         menuY = (height - menuHeight) / 2
 
         val startY = menuY + 10
-        
+
         val commandBtn = Button.builder(Component.translatable("menu.action_picker.command")) {
             onSelectedAction.accept(CommandActionData())
             onClose()
@@ -38,8 +37,8 @@ class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")
         addRenderableWidget(keybindBtn)
     }
 
-    override fun render(context: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
-        super.render(context, mouseX, mouseY, delta)
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
+        super.extractRenderState(graphics, mouseX, mouseY, delta)
     }
 
     override fun onClose() {

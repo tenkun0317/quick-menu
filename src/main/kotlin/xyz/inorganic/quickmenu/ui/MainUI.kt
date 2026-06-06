@@ -1,9 +1,8 @@
 package xyz.inorganic.quickmenu.ui
 
-import net.minecraft.client.gui.components.EditBox
-import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.components.EditBox
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.screens.Screen
@@ -29,7 +28,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private var menuY = 0
     private var menuWidth = 0
     private var menuHeight = 0
-    
+
     private var scrollOffset = 0
     private val rowHeight = 30
 
@@ -40,7 +39,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     companion object {
         private val navigationStack = mutableListOf<ActionButtonData>()
-        
+
         fun currentFolder(): ActionButtonData? = navigationStack.lastOrNull()
         fun navigateTo(folder: ActionButtonData) = navigationStack.add(folder)
         fun navigateToLevel(index: Int) {
@@ -52,8 +51,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     override fun init() {
         val config = QuickMenu.CONFIG
-        
-        // Reset navigation ONLY on initial open if keepNavigationHistory is false
+
         if (firstInit) {
             if (!config.keepNavigationHistory && navigationStack.isNotEmpty()) {
                 navigateRoot()
@@ -68,21 +66,19 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         buttonDataMap.clear()
 
-        // Search Box
         if (isSearching) {
             val existingValue = if (::searchBox.isInitialized) searchBox.value else ""
             searchBox = EditBox(font, menuX + 8, menuY + 6, menuWidth - 50, 12, Component.empty())
             searchBox.isBordered = false
             searchBox.value = existingValue
-            searchBox.setResponder { 
+            searchBox.setResponder {
                 scrollOffset = 0
-                rebuildWidgets() 
+                rebuildWidgets()
             }
             addRenderableWidget(searchBox)
             setInitialFocus(searchBox)
         }
 
-        // Toggle Buttons
         val toggleButtonsY = menuY + 4
         var currentToggleX = menuX + menuWidth - 22
 
@@ -196,19 +192,18 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             return true
         }
 
-        // Check breadcrumb clicks
         if (!isSearching) {
             val y = menuY + 8
             val breadcrumbs = getBreadcrumbs()
             breadcrumbs.forEach { (label, level, bounds) ->
                 if (event.x() >= bounds.first && event.x() <= bounds.second && event.y() >= y && event.y() <= y + 9) {
-                    if (level == -2) { // "..."
+                    if (level == -2) {
                         val visibleLevels = breadcrumbs.map { it.level }.toSet()
                         val omitted = navigationStack.mapIndexedNotNull { index, data ->
                             if (!visibleLevels.contains(index)) index to data.name else null
                         }
                         if (omitted.isNotEmpty()) {
-                            minecraft?.setScreen(BreadcrumbPopupUI(omitted, { 
+                            minecraft?.setScreen(BreadcrumbPopupUI(omitted, {
                                 navigateToLevel(it)
                                 scrollOffset = 0
                                 rebuildWidgets()
@@ -262,16 +257,17 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun isKeyDown(keyName: String): Boolean {
-        val window = Minecraft.getInstance().window
+        val client = Minecraft.getInstance()
+        val window = client.window
         return try {
             val key = InputConstants.getKey(keyName)
             if (key == InputConstants.UNKNOWN) return false
-            
+
             if (key.type == InputConstants.Type.MOUSE) {
                 when (key.value) {
-                    0 -> Minecraft.getInstance().mouseHandler.isLeftPressed
-                    1 -> Minecraft.getInstance().mouseHandler.isRightPressed
-                    2 -> Minecraft.getInstance().mouseHandler.isMiddlePressed
+                    0 -> client.mouseHandler.isLeftPressed
+                    1 -> client.mouseHandler.isRightPressed
+                    2 -> client.mouseHandler.isMiddlePressed
                     else -> false
                 }
             } else {
@@ -282,16 +278,16 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
     }
 
-    override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        guiGraphics.fill(menuX - 1, menuY - 1, menuX + menuWidth + 1, menuY + menuHeight + 1, 0x44000000.toInt())
-        guiGraphics.fill(menuX, menuY, menuX + menuWidth, menuY + menuHeight, 0xCC121212.toInt())
-        renderThinBorder(guiGraphics, menuX, menuY, menuWidth, menuHeight, 0x33FFFFFF.toInt())
-        guiGraphics.fill(menuX, menuY, menuX + menuWidth, menuY + 24, 0x22FFFFFF.toInt())
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
+        graphics.fill(menuX - 1, menuY - 1, menuX + menuWidth + 1, menuY + menuHeight + 1, 0x44000000.toInt())
+        graphics.fill(menuX, menuY, menuX + menuWidth, menuY + menuHeight, 0xCC121212.toInt())
+        renderThinBorder(graphics, menuX, menuY, menuWidth, menuHeight, 0x33FFFFFF.toInt())
+        graphics.fill(menuX, menuY, menuX + menuWidth, menuY + 24, 0x22FFFFFF.toInt())
         val separatorY = menuY + 24
-        guiGraphics.fill(menuX + 1, separatorY, menuX + menuWidth - 1, separatorY + 1, 0x44FFFFFF.toInt())
+        graphics.fill(menuX + 1, separatorY, menuX + menuWidth - 1, separatorY + 1, 0x44FFFFFF.toInt())
 
-        super.render(guiGraphics, mouseX, mouseY, partialTick)
-        
+        super.extractRenderState(graphics, mouseX, mouseY, delta)
+
         val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
             getFilteredActions(searchBox.value)
         } else {
@@ -302,34 +298,33 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             val sbX = menuX + menuWidth - 5
             val sbY = menuY + 28
             val sbH = QuickMenu.CONFIG.visibleRows * rowHeight
-            guiGraphics.fill(sbX, sbY, sbX + 3, sbY + sbH, 0x22FFFFFF.toInt())
+            graphics.fill(sbX, sbY, sbX + 3, sbY + sbH, 0x22FFFFFF.toInt())
             val thumbH = maxOf(4, (QuickMenu.CONFIG.visibleRows.toDouble() / totalRows.toDouble() * sbH).toInt())
             val maxScroll = (totalRows - QuickMenu.CONFIG.visibleRows) * rowHeight
             val thumbY = if (maxScroll > 0) sbY + (scrollOffset.toDouble() / maxScroll.toDouble() * (sbH - thumbH)).toInt() else sbY
             val thumbColor = if (isDraggingScrollbar || isMouseOverScrollbar(mouseX.toDouble(), mouseY.toDouble())) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
-            guiGraphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbH, thumbColor)
+            graphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbH, thumbColor)
         }
 
         val contentStartY = menuY + 25
         val contentEndY = contentStartY + QuickMenu.CONFIG.visibleRows * rowHeight + 3
         val maxScroll = maxOf(0, (totalRows - QuickMenu.CONFIG.visibleRows) * rowHeight)
 
-        if (scrollOffset > 0) guiGraphics.fillGradient(menuX + 1, contentStartY, menuX + menuWidth - 1, contentStartY + 12, 0x99000000.toInt(), 0x00000000.toInt())
-        if (scrollOffset < maxScroll) guiGraphics.fillGradient(menuX + 1, contentEndY - 12, menuX + menuWidth - 1, contentEndY, 0x00000000.toInt(), 0x99000000.toInt())
+        if (scrollOffset > 0) graphics.fillGradient(menuX + 1, contentStartY, menuX + menuWidth - 1, contentStartY + 12, 0x99000000.toInt(), 0x00000000.toInt())
+        if (scrollOffset < maxScroll) graphics.fillGradient(menuX + 1, contentEndY - 12, menuX + menuWidth - 1, contentEndY, 0x00000000.toInt(), 0x99000000.toInt())
 
         if (!isSearching) {
-            renderBreadcrumbs(guiGraphics, mouseX, mouseY)
+            renderBreadcrumbs(graphics, mouseX, mouseY)
         } else {
-            // Draw search focus underline
             if (::searchBox.isInitialized && searchBox.isFocused) {
-                guiGraphics.fill(menuX + 8, menuY + 18, menuX + menuWidth - 42, menuY + 19, 0xAAFFFFFF.toInt())
+                graphics.fill(menuX + 8, menuY + 18, menuX + menuWidth - 42, menuY + 19, 0xAAFFFFFF.toInt())
             }
         }
 
         if (actions.isEmpty()) {
             val emptyMsg = Component.translatable("menu.main.no_actions")
             val msgW = font.width(emptyMsg)
-            guiGraphics.drawString(font, emptyMsg, menuX + (menuWidth - msgW) / 2, menuY + (menuHeight / 2), 0x66FFFFFF.toInt(), false)
+            graphics.centeredText(font, emptyMsg, menuX + (menuWidth - msgW) / 2, menuY + (menuHeight / 2), 0x66FFFFFF.toInt())
         }
 
         if (editMode) {
@@ -338,8 +333,8 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
             buttonDataMap.keys.forEach { btn ->
                 if (btn.isHovered) {
-                    if (isDeleteDown) renderIndicator(guiGraphics, btn, 0xFFFF0000.toInt(), "×")
-                    else if (isMoveDown) renderIndicator(guiGraphics, btn, 0xFF00AAFF.toInt(), "↔")
+                    if (isDeleteDown) renderIndicator(graphics, btn, 0xFFFF0000.toInt(), "×")
+                    else if (isMoveDown) renderIndicator(graphics, btn, 0xFF00AAFF.toInt(), "↔")
                 }
             }
         }
@@ -348,13 +343,12 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     data class BreadcrumbItem(val label: String, val level: Int, val bounds: Pair<Int, Int>)
 
     private fun getBreadcrumbs(): List<BreadcrumbItem> {
-        val maxWidth = menuWidth - 30 // Padding for icons
+        val maxWidth = menuWidth - 30
         var currentX = menuX + 10
-        
-        // 1. Calculate full path widths
+
         val rootWidth = font.width("Root")
         var totalWidth = currentX + rootWidth + 5
-        
+
         val allItems = navigationStack.mapIndexed { index, data ->
             val label = data.name
             val w = font.width("> $label")
@@ -362,8 +356,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             totalWidth += itemWidth
             Triple(label, index, w)
         }
-        
-        // 2. If it fits, return full path
+
         if (totalWidth <= menuX + maxWidth) {
             val result = mutableListOf<BreadcrumbItem>()
             var x = currentX
@@ -375,89 +368,82 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             }
             return result
         }
-        
-        // 3. Truncation logic: Root > ... > [as many as fit from end]
+
         val result = mutableListOf<BreadcrumbItem>()
         var x = currentX
-        
-        // Add Root
+
         result.add(BreadcrumbItem("Root", -1, x to (x + rootWidth)))
         x += rootWidth + 5
-        
-        // Add "..."
+
         val dotsW = font.width("> ...")
         result.add(BreadcrumbItem("...", -2, x to (x + dotsW)))
         x += dotsW + 5
-        
-        // Add trailing items greedily from the end
+
         val availableWidth = (menuX + maxWidth) - x
         val trailingItems = mutableListOf<BreadcrumbItem>()
         var usedTrailingWidth = 0
-        
+
         for (i in allItems.indices.reversed()) {
             val (label, index, w) = allItems[i]
             if (usedTrailingWidth + w + 5 <= availableWidth) {
-                trailingItems.add(0, BreadcrumbItem(label, index, 0 to 0)) // Bounds set below
+                trailingItems.add(0, BreadcrumbItem(label, index, 0 to 0))
                 usedTrailingWidth += w + 5
             } else {
                 break
             }
         }
-        
-        // If even the last item doesn't fit, force show it (better than nothing)
+
         if (trailingItems.isEmpty() && allItems.isNotEmpty()) {
             val (label, index, w) = allItems.last()
             trailingItems.add(BreadcrumbItem(label, index, 0 to 0))
         }
-        
-        // Calculate final bounds for trailing items
+
         trailingItems.forEach { item ->
             val w = font.width("> ${item.label}")
             val finalItem = item.copy(bounds = x to (x + w))
             result.add(finalItem)
             x += w + 5
         }
-        
+
         return result
     }
 
-    private fun renderBreadcrumbs(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int) {
+    private fun renderBreadcrumbs(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int) {
         val y = menuY + 8
         val breadcrumbs = getBreadcrumbs()
-        
+
         breadcrumbs.forEach { (label, level, bounds) ->
             val isRoot = level == -1
             val isDots = level == -2
             val displayText = if (isRoot) label else "> $label"
-            
+
             val isHovered = mouseX >= bounds.first && mouseX <= bounds.second && mouseY >= y && mouseY <= y + 9
             val isLast = level == navigationStack.size - 1
-            
+
             val color = when {
                 isDots -> 0xFF666666.toInt()
                 isLast -> -1
                 isHovered -> 0xFFFFFFFF.toInt()
                 else -> 0xFFAAAAAA.toInt()
             }
-            
-            guiGraphics.drawString(font, displayText, bounds.first, y, color, true)
+
+            graphics.text(font, displayText, bounds.first, y, color, true)
         }
     }
 
-
-    private fun renderIndicator(guiGraphics: GuiGraphics, btn: QuickMenuButton, color: Int, text: String) {
+    private fun renderIndicator(graphics: GuiGraphicsExtractor, btn: QuickMenuButton, color: Int, text: String) {
         val xSize = 10
         val xX = btn.x + btn.width - xSize + 2
         val xY = btn.y - 2
-        guiGraphics.fill(xX, xY, xX + xSize, xY + xSize, color)
-        guiGraphics.drawString(font, text, xX + (xSize - font.width(text)) / 2 + 1, xY + 1, -1, false)
+        graphics.fill(xX, xY, xX + xSize, xY + xSize, color)
+        graphics.text(font, text, xX + (xSize - font.width(text)) / 2 + 1, xY + 1, -1, false)
     }
 
-    private fun renderThinBorder(guiGraphics: GuiGraphics, x: Int, y: Int, w: Int, h: Int, color: Int) {
-        guiGraphics.fill(x, y, x + w, y + 1, color)
-        guiGraphics.fill(x, y + h - 1, x + w, y + h, color)
-        guiGraphics.fill(x, y + 1, x + 1, y + h - 1, color)
-        guiGraphics.fill(x + w - 1, y + 1, x + w, y + h - 1, color)
+    private fun renderThinBorder(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, h: Int, color: Int) {
+        graphics.fill(x, y, x + w, y + 1, color)
+        graphics.fill(x, y + h - 1, x + w, y + h, color)
+        graphics.fill(x, y + 1, x + 1, y + h - 1, color)
+        graphics.fill(x + w - 1, y + 1, x + w, y + h - 1, color)
     }
 
     private fun handleLeftClick(data: ActionButtonData) {
@@ -498,17 +484,16 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
     private fun handleRightClick(data: ActionButtonData) {
         if (!editMode) return
-        
+
         if (isKeyDown(QuickMenu.CONFIG.moveModifier)) {
             moveAction(data, 1)
         } else {
-            // Right click ALWAYS opens editor in edit mode
             gotoActionEditor(data)
         }
     }
 
     private fun moveAction(data: ActionButtonData, direction: Int) {
-        if (isSearching) return // Disable move in search mode
+        if (isSearching) return
         val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
         val index = actions.indexOf(data)
         val newIndex = index + direction
@@ -520,7 +505,6 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     private fun deleteAction(data: ActionButtonData) {
-        // If searching, we need to find the actual parent to delete from
         if (isSearching) {
             fun findAndDelete(list: MutableList<ActionButtonData>): Boolean {
                 if (list.remove(data)) return true
@@ -534,7 +518,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             val actions = currentFolder()?.children ?: ActionButtonDataHandler.actions
             actions.remove(data)
         }
-        
+
         ActionButtonDataHandler.save()
         rebuildWidgets()
     }
