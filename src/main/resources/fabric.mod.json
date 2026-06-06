@@ -33,11 +33,11 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.16.10",
-		"minecraft": "1.21.11",
-		"java": ">=21",
+		"minecraft": ">=26.1",
+		"java": ">=25",
 		"fabric-api": "*",
 		"fabric-language-kotlin": ">=1.11.0",
 		"fabric-key-binding-api-v1": "*",
-		"cloth-config2": "*"
+		"yacl": ">=3.9.0+26.1"
 	}
 }
