@@ -1,128 +1,60 @@
+[日本語](README_ja.md)
+
 # Quick Menu (Renewed)
 
-[English](README.md) | [日本語](README.md#quick-menu-renewed---日本語)
+A Fabric mod for Minecraft that lets you register commands and keybindings to buttons and execute them quickly from a menu.
 
-![License](https://img.shields.io/github/license/tenkun0317/quick-menu?style=flat-square)
-![Version](https://img.shields.io/github/v/release/tenkun0317/quick-menu?style=flat-square)
-
-**Quick Menu (Renewed)** is a modernized, lightweight Fabric MOD for Minecraft that provides a highly configurable menu for executing repetitive commands and keybindings. 
-
-This is a **renewed fork** maintained by **inorganic**, based on the original (abandoned) quick-menu. It has been completely rebuilt to remove heavy dependencies like `owo-lib`, offering a faster, cleaner, and more stable experience.
+**A reconstruction of the original Fork by ImCodist, built without heavy dependencies like `owo-lib`.**
 
 ---
 
-## Key Features
+## Features
 
-### Modern & Minimalist Design
-* **Glassmorphism UI**: A sleek, semi-transparent charcoal interface designed to blend seamlessly with the modern Minecraft look.
-* **Pure Vanilla UI**: No more heavy libraries. Built directly on Minecraft's native UI system for maximum compatibility and performance.
-* **Interactive Scrollbars**: Full support for mouse wheel and draggable scrollbars in all menus.
-
-### Powerful Customization
-* **Dynamic Grid Size**: Configure exactly how many buttons per row and how many rows are visible. The menu scales perfectly to fit your settings.
-* **Advanced Action Editor**: Each button can run multiple actions (Commands or Keybinds).
-* **Icon Support**: Pick any item as an icon, with full support for `CustomModelData`.
-* **Modifier Keybinds**: Supports complex combinations like `Ctrl + C`, `Shift + G`, etc.
-
-### Expert Productivity
-* **Quick Reorder (Ctrl + Click)**: Reorder buttons directly from the main menu by holding Ctrl while in edit mode.
-* **Quick Delete (Shift + Click)**: Instantly delete buttons while in edit mode by holding Shift.
-* **Release to Execute**: Optionally trigger the hovered action the moment you release the menu key.
+| Feature | Description |
+|---------|-------------|
+| **Folder navigation** | Organize buttons into folders |
+| **Breadcrumb list** | Visual display of folder hierarchy |
+| **Search (F key)** | Search button names and execute instantly |
+| **Edit mode (E key)** | Add, edit, and delete buttons |
+| **Quick reorder** | Ctrl+click in edit mode |
+| **Quick delete** | Shift+click in edit mode |
+| **Release to execute** | Execute action the moment you release the key |
 
 ---
 
 ## Usage
 
-1. **Open Menu**: Press `G` (default) to open the menu.
-2. **Edit Mode**: Click the pencil icon (`✎`) or press `E` to enter edit mode.
-3. **Add Action**: Use the `+ Action` button at the bottom of the editor.
-4. **Quick Organize (Edit Mode only)**:
-   - **Ctrl + Left Click**: Move button left.
-   - **Ctrl + Right Click**: Move button right.
-   - **Shift + Click**: Delete button.
+1. **Open menu**: `G` (default)
+2. **Edit mode**: `E` key or pencil icon
+3. **Search**: `F` key or magnifying glass icon
+4. **Navigate folders**: Click folder icon
+5. **Go back**: Click `Root` in the breadcrumb list
 
 ---
 
-## Dependencies
+## Configuration
 
-* [Fabric Loader](https://fabricmc.net/)
-* [Fabric API](https://modrinth.com/mod/fabric-api)
-* [Cloth Config API](https://modrinth.com/mod/cloth-config)
-* [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
+- Buttons per row
+- Number of visible rows
+- Close on key release
+- Close after action execution
+- Hide edit icon
 
 ---
 
-## License
+## Technical Specs
 
-This project is licensed under the **GNU General Public License v3.0**.  
-Original project by ImCodist. Renewed version by inorganic.
+- **Dependencies**: Fabric Loader, Fabric API
+- **Recommended**: YACL, ModMenu
+- **Language**: Kotlin
+- **Data storage**: JSON (Global)
+- **License**: GPL-3.0
 
 ---
 
 ## Links
 
-* **Repository**: [https://github.com/tenkun0317/quick-menu](https://github.com/tenkun0317/quick-menu)
-* **Report Bugs**: [Issues Page](https://github.com/tenkun0317/quick-menu/issues)
-
----
-
-# Quick Menu (Renewed) - 日本語
-
-**Quick Menu (Renewed)** は、繰り返しのコマンド実行やキーバインドを高度に設定可能なメニューで提供する、軽量でモダンな Fabric MOD です。
-
-これは **inorganic** によってメンテナンスされている、オリジナルの（開発停止した）quick-menu の **リニューアル版フォーク** です。`owo-lib` のような重い依存関係を排除し、より高速でクリーン、かつ安定した体験を提供するために完全に再構築されました。
-
----
-
-## 主な機能
-
-### モダンでミニマルなデザイン
-* **グラスモーフィズム UI**: Minecraft のモダンな外観にシームレスに溶け込むよう設計された、洗練された半透明のチャコールインターフェース。
-* **純粋なバニラ UI**: 重いライブラリはもう不要です。最高の互換性とパフォーマンスのために、Minecraft ネイティブの UI システム上に直接構築されています。
-* **インタラクティブなスクロールバー**: すべてのメニューでマウスホイールとドラッグ可能なスクロールバーを完全にサポート。
-
-### 強力なカスタマイズ
-* **ダイナミックなグリッドサイズ**: 1行あたりのボタン数と表示する行数を正確に設定可能。メニューは設定に合わせて完璧にスケールします。
-* **高度なアクションエディター**: 各ボタンで複数のアクション（コマンドまたはキーバインド）を実行可能。
-* **アイコンのサポート**: `CustomModelData` を完全にサポートしており、任意のアイテムをアイコンとして選択できます。
-* **修飾キーバインド**: `Ctrl + C` や `Shift + G` などの複雑な組み合わせをサポート。
-
-### エキスパート向けの生産性
-* **クイック並べ替え (Ctrl + クリック)**: 編集モード中に Ctrl を押し続けながらボタンをドラッグするかクリックして、メインメニュー上で直接並べ替え。
-* **クイック削除 (Shift + クリック)**: 編集モード中に Shift を押し続けながらボタンを即座に削除。
-* **離して実行**: メニューキーを離した瞬間に、ホバーしているアクションを実行するオプション。
-
----
-
-## 使い方
-
-1. **メニューを開く**: `G`（デフォルト）を押してメニューを開きます。
-2. **編集モード**: 鉛筆アイコン (`✎`) をクリックするか、`E` キーを押して編集モードに入ります。
-3. **アクションを追加**: エディターの下部にある `アクションを追加` ボタンを使用します。
-4. **クイック整理 (編集モードのみ)**:
-   - **Ctrl + 左クリック**: ボタンを左に移動。
-   - **Ctrl + 右クリック**: ボタンを右に移動。
-   - **Shift + 左クリック**: ボタンを削除。
-
----
-
-## 依存関係
-
-* [Fabric Loader](https://fabricmc.net/)
-* [Fabric API](https://modrinth.com/mod/fabric-api)
-* [Cloth Config API](https://modrinth.com/mod/cloth-config)
-* [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
-
----
-
-## ライセンス
-
-このプロジェクトは **GNU General Public License v3.0** の下でライセンスされています。  
-ImCodist によるオリジナルプロジェクト。inorganic によるリニューアル版。
-
----
-
-## リンク
-
-* **リポジトリ**: [https://github.com/tenkun0317/quick-menu](https://github.com/tenkun0317/quick-menu)
-* **バグ報告**: [Issues Page](https://github.com/tenkun0317/quick-menu/issues)
+- [Modrinth](https://modrinth.com/mod/quick-menu-renewed)
+- [Repository](https://github.com/tenkun0317/quick-menu)
+- [Report Issues](https://github.com/tenkun0317/quick-menu/issues)
+- [TODO](todo.md)
