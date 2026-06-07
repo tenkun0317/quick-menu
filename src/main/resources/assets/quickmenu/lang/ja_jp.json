@@ -13,8 +13,22 @@
   "menu.main.no_actions": "アクションが作成されていません。",
   "menu.main.button.add_action": "アクションを追加",
   "menu.main.button.settings": "設定",
+  "menu.main.button.export": "エクスポート",
+  "menu.main.button.import": "インポート",
   "menu.main.delete.confirm.title": "削除の確認",
   "menu.main.delete.confirm.message": "「%s」を削除しますか？",
+  "menu.main.import.confirm.title": "インポートの確認",
+  "menu.main.import.confirm.message": "現在のすべてのボタンを %s 個の新ボタンに置き換えます。続行しますか？",
+  "menu.main.import.confirm.message.with_mode": "モード: %1$s。%2$s 個のボタンを適用します。続行しますか？",
+  "menu.main.import.confirm.choose": "%s 個のボタンを検出しました。インポート方法を選んでください:",
+  "menu.main.import.cancel": "キャンセル",
+  "menu.main.import.mode.replace_all": "すべて置き換え",
+  "menu.main.import.mode.merge_by_name": "名前一致で置き換え+追加",
+  "menu.main.import.mode.add_only": "追加のみ",
+  "menu.main.export.success": "%s 個のボタンをクリップボードにコピーしました",
+  "menu.main.export.failure": "エクスポートに失敗しました: %s",
+  "menu.main.import.success": "%s 個のボタンをインポートしました",
+  "menu.main.import.failure": "インポートに失敗しました: %s",
 
   "menu.action_picker.title": "アクションの種類を選択",
   "menu.action_picker.command": "コマンド",
@@ -64,5 +78,11 @@
 
   "text.config.quickmenu.option.displayRunText.value.always": "常に表示",
   "text.config.quickmenu.option.displayRunText.value.keybind_only": "キーバインドのみ",
-  "text.config.quickmenu.option.displayRunText.value.never": "非表示"
+  "text.config.quickmenu.option.displayRunText.value.never": "非表示",
+
+  "text.config.quickmenu.option.defaultImportMode": "デフォルトのインポート方法",
+  "text.config.quickmenu.option.importMode.value.ask": "毎回選択する",
+  "text.config.quickmenu.option.importMode.value.replace_all": "すべて置き換え",
+  "text.config.quickmenu.option.importMode.value.merge_by_name": "名前一致で置き換え+追加",
+  "text.config.quickmenu.option.importMode.value.add_only": "追加のみ"
 }

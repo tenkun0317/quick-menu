@@ -12,8 +12,22 @@
   "menu.main.no_actions": "尚未建立任何操作。",
   "menu.main.button.add_action": "新增操作",
   "menu.main.button.settings": "設定",
+  "menu.main.button.export": "匯出",
+  "menu.main.button.import": "匯入",
   "menu.main.delete.confirm.title": "確認刪除",
   "menu.main.delete.confirm.message": "刪除「%s」？",
+  "menu.main.import.confirm.title": "確認匯入",
+  "menu.main.import.confirm.message": "這將以 %s 個新按鈕取代所有目前按鈕。是否繼續？",
+  "menu.main.import.confirm.message.with_mode": "模式: %1$s。將套用 %2$s 個按鈕。是否繼續？",
+  "menu.main.import.confirm.choose": "偵測到 %s 個按鈕。請選擇匯入方式:",
+  "menu.main.import.cancel": "取消",
+  "menu.main.import.mode.replace_all": "全部取代",
+  "menu.main.import.mode.merge_by_name": "依名稱合併+新增",
+  "menu.main.import.mode.add_only": "僅新增",
+  "menu.main.export.success": "已將 %s 個按鈕複製到剪貼簿",
+  "menu.main.export.failure": "匯出失敗: %s",
+  "menu.main.import.success": "已匯入 %s 個按鈕",
+  "menu.main.import.failure": "匯入失敗: %s",
 
   "menu.action_picker.title": "選擇操作類型",
   "menu.action_picker.command": "command",
@@ -59,5 +73,11 @@
 
   "text.config.quickmenu.option.displayRunText.value.always": "始終",
   "text.config.quickmenu.option.displayRunText.value.keybind_only": "僅 keybind",
-  "text.config.quickmenu.option.displayRunText.value.never": "從不"
+  "text.config.quickmenu.option.displayRunText.value.never": "從不",
+
+  "text.config.quickmenu.option.defaultImportMode": "預設匯入方式",
+  "text.config.quickmenu.option.importMode.value.ask": "每次詢問",
+  "text.config.quickmenu.option.importMode.value.replace_all": "全部取代",
+  "text.config.quickmenu.option.importMode.value.merge_by_name": "依名稱合併+新增",
+  "text.config.quickmenu.option.importMode.value.add_only": "僅新增"
 }

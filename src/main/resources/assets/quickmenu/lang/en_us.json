@@ -13,8 +13,22 @@
   "menu.main.no_actions": "No actions created.",
   "menu.main.button.add_action": "Add Action",
   "menu.main.button.settings": "Settings",
+  "menu.main.button.export": "Export",
+  "menu.main.button.import": "Import",
   "menu.main.delete.confirm.title": "Confirm Delete",
   "menu.main.delete.confirm.message": "Delete \"%s\"?",
+  "menu.main.import.confirm.title": "Confirm Import",
+  "menu.main.import.confirm.message": "This will replace all current buttons with %s new ones. Continue?",
+  "menu.main.import.confirm.message.with_mode": "Mode: %1$s. %2$s buttons will be applied. Continue?",
+  "menu.main.import.confirm.choose": "%s buttons detected. Choose an import mode:",
+  "menu.main.import.cancel": "Cancel",
+  "menu.main.import.mode.replace_all": "Replace All",
+  "menu.main.import.mode.merge_by_name": "Merge by Name",
+  "menu.main.import.mode.add_only": "Add Only",
+  "menu.main.export.success": "Copied %s buttons to clipboard",
+  "menu.main.export.failure": "Export failed: %s",
+  "menu.main.import.success": "Imported %s buttons",
+  "menu.main.import.failure": "Import failed: %s",
 
   "menu.action_picker.title": "Select Action Type",
   "menu.action_picker.command": "Command",
@@ -63,5 +77,11 @@
   "text.config.quickmenu.option.displayRunText.value.always": "Always",
   "text.config.quickmenu.option.displayRunText.value.always": "Always",
   "text.config.quickmenu.option.displayRunText.value.keybind_only": "Keybind Only",
-  "text.config.quickmenu.option.displayRunText.value.never": "Never"
+  "text.config.quickmenu.option.displayRunText.value.never": "Never",
+
+  "text.config.quickmenu.option.defaultImportMode": "Default Import Mode",
+  "text.config.quickmenu.option.importMode.value.ask": "Ask Each Time",
+  "text.config.quickmenu.option.importMode.value.replace_all": "Replace All",
+  "text.config.quickmenu.option.importMode.value.merge_by_name": "Merge by Name",
+  "text.config.quickmenu.option.importMode.value.add_only": "Add Only"
 }

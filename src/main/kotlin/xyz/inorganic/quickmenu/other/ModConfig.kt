@@ -10,6 +10,10 @@ class ModConfig {
         ALWAYS, KEYBIND_ONLY, NEVER
     }
 
+    enum class ImportMode {
+        ASK, REPLACE_ALL, MERGE_BY_NAME, ADD_ONLY
+    }
+
     // Menu size based on button counts
     var buttonsPerRow: Int = 5
     var visibleRows: Int = 2
@@ -24,6 +28,9 @@ class ModConfig {
     
     var keepNavigationHistory: Boolean = false
 
+    // Import/Export
+    var defaultImportMode: ImportMode = ImportMode.ASK
+
     // Edit mode modifiers (Stored as key name strings)
     var moveModifier: String = "key.keyboard.left.control"
     var deleteModifier: String = "key.keyboard.left.shift"
@@ -37,6 +44,7 @@ class ModConfig {
     fun showActionsInTooltip(): Boolean = showActionsInTooltip
     fun displayRunText(): DisplayRunText = displayRunText
     fun keepNavigationHistory(): Boolean = keepNavigationHistory
+    fun defaultImportMode(): ImportMode = defaultImportMode
     fun moveModifier(): String = moveModifier
     fun deleteModifier(): String = deleteModifier
 

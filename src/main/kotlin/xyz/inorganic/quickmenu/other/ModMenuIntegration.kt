@@ -80,6 +80,14 @@ class ModMenuIntegration : ModMenuApi {
                     }
                     .binding(ModConfig.DisplayRunText.KEYBIND_ONLY, { config.displayRunText }, { config.displayRunText = it })
                     .build())
+                .option(Option.createBuilder<ModConfig.ImportMode>()
+                    .name(Component.translatable("text.config.quickmenu.option.defaultImportMode"))
+                    .controller { opt ->
+                        EnumControllerBuilder.create(opt)
+                            .enumClass(ModConfig.ImportMode::class.java)
+                    }
+                    .binding(ModConfig.ImportMode.ASK, { config.defaultImportMode }, { config.defaultImportMode = it })
+                    .build())
                 .build())
             .build()
             .generateScreen(parent)

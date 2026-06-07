@@ -14,8 +14,11 @@ import com.mojang.blaze3d.platform.InputConstants
 import xyz.inorganic.quickmenu.QuickMenu
 import xyz.inorganic.quickmenu.data.ActionButtonData
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
+import xyz.inorganic.quickmenu.other.ImportExportManager
+import xyz.inorganic.quickmenu.other.ModConfig
 import xyz.inorganic.quickmenu.other.ModKeybindings
 import xyz.inorganic.quickmenu.other.ModMenuIntegration
+import xyz.inorganic.quickmenu.ui.components.ImportConfirmScreen
 import xyz.inorganic.quickmenu.ui.components.QuickMenuButton
 import xyz.inorganic.quickmenu.ui.popups.BreadcrumbPopupUI
 import java.util.Collections
@@ -124,6 +127,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         if (editMode) {
             val editorY = menuY + menuHeight + 8
+            val importExportY = editorY + 22
             addRenderableWidget(Button.builder(Component.literal("+ Action")) {
                 gotoActionEditor(null)
             }.pos(menuX, editorY).size(menuWidth / 2 - 2, 20).build())
@@ -131,6 +135,83 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             addRenderableWidget(Button.builder(Component.literal("Settings")) {
                 minecraft?.setScreen(ModMenuIntegration().getModConfigScreenFactory().create(this))
             }.pos(menuX + menuWidth / 2 + 2, editorY).size(menuWidth / 2 - 2, 20).build())
+
+            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.export")) {
+                handleExport()
+            }.pos(menuX, importExportY).size(menuWidth / 2 - 2, 20).build())
+
+            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.import")) {
+                handleImport()
+            }.pos(menuX + menuWidth / 2 + 2, importExportY).size(menuWidth / 2 - 2, 20).build())
+        }
+    }
+
+    private fun handleExport() {
+        when (val result = ImportExportManager.copyToClipboard()) {
+            is ImportExportManager.Result.Success -> {
+                minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.export.success", result.count))
+            }
+            is ImportExportManager.Result.Failure -> {
+                minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.export.failure", result.reason))
+            }
+        }
+    }
+
+    private fun handleImport() {
+        val raw = try {
+            net.minecraft.client.Minecraft.getInstance().keyboardHandler.getClipboard()
+        } catch (e: Exception) {
+            null
+        }
+        if (raw.isNullOrBlank()) {
+            minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.failure", "Clipboard is empty"))
+            return
+        }
+
+        when (val peek = ImportExportManager.peekCount(raw)) {
+            is ImportExportManager.Result.Failure -> {
+                minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.failure", peek.reason))
+                return
+            }
+            is ImportExportManager.Result.Success -> {
+                val previewCount = peek.count
+                val defaultMode = QuickMenu.CONFIG.defaultImportMode
+                if (defaultMode == ModConfig.ImportMode.ASK) {
+                    val modeScreen = ImportConfirmScreen(previewCount, { selectedMode ->
+                        runImportWithMode(raw, selectedMode)
+                    }, this)
+                    minecraft?.setScreen(modeScreen)
+                } else {
+                    val modeLabelKey = when (defaultMode) {
+                        ModConfig.ImportMode.REPLACE_ALL -> "menu.main.import.mode.replace_all"
+                        ModConfig.ImportMode.MERGE_BY_NAME -> "menu.main.import.mode.merge_by_name"
+                        ModConfig.ImportMode.ADD_ONLY -> "menu.main.import.mode.add_only"
+                        ModConfig.ImportMode.ASK -> "menu.main.import.mode.replace_all"
+                    }
+                    val modeLabel = Component.translatable(modeLabelKey).string
+                    val confirmScreen = ConfirmScreen({ confirmed ->
+                        if (confirmed) {
+                            runImportWithMode(raw, defaultMode)
+                        }
+                        minecraft?.setScreen(this)
+                    }, Component.translatable("menu.main.import.confirm.title"), Component.translatable("menu.main.import.confirm.message.with_mode", previewCount, modeLabel))
+                    minecraft?.setScreen(confirmScreen)
+                }
+            }
+        }
+    }
+
+    private fun runImportWithMode(raw: String, mode: ModConfig.ImportMode) {
+        when (val result = ImportExportManager.applyImport(raw, mode)) {
+            is ImportExportManager.Result.Success -> {
+                NavigationState.navigateRoot()
+                scrollOffset = 0
+                rebuildWidgets()
+                minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.success", result.count))
+            }
+            is ImportExportManager.Result.Failure -> {
+                minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.failure", result.reason))
+            }
         }
     }
 

@@ -19,6 +19,7 @@ A Fabric mod for Minecraft that lets you register commands and keybindings to bu
 | **Quick reorder** | Ctrl+click in edit mode |
 | **Quick delete** | Shift+click in edit mode |
 | **Release to execute** | Execute action the moment you release the key |
+| **Import / Export** | Share button layouts via clipboard (JSON + Base64) |
 
 ---
 
@@ -29,6 +30,8 @@ A Fabric mod for Minecraft that lets you register commands and keybindings to bu
 3. **Search**: `F` key or magnifying glass icon
 4. **Navigate folders**: Click folder icon
 5. **Go back**: Click `Root` in the breadcrumb list
+6. **Export**: In edit mode, click `Export` to copy your button layout to the clipboard
+7. **Import**: In edit mode, click `Import` to load a layout from the clipboard (mode selectable)
 
 ---
 
@@ -39,6 +42,7 @@ A Fabric mod for Minecraft that lets you register commands and keybindings to bu
 - Close on key release
 - Close after action execution
 - Hide edit icon
+- Default import mode (`Ask Each Time` / `Replace All` / `Merge by Name` / `Add Only`)
 
 ---
 
