@@ -63,7 +63,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                 actionButtonData.icon = item
                 rebuildWidgets()
             }
-            minecraft?.setScreen(itemPicker)
+            minecraft?.gui?.setScreen(itemPicker)
         })
         iconButton.x = menuX + 100
         iconButton.y = menuY + 40
@@ -96,7 +96,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                 syncInputToData()
                 val listEditor = ActionListEditorUI(actionButtonData)
                 listEditor.previousScreen = this
-                minecraft?.setScreen(listEditor)
+                minecraft?.gui?.setScreen(listEditor)
             }.pos(menuX + 100, menuY + 120).size(140, 20).build())
         }
 
@@ -117,9 +117,9 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                     actionButtonData.isFolder = false
                     rebuildWidgets()
                 }
-                minecraft?.setScreen(this)
+                minecraft?.gui?.setScreen(this)
             }, Component.literal("Convert to Action"), Component.literal("This folder has items. Move them to the parent list?"))
-            minecraft?.setScreen(warningScreen)
+            minecraft?.gui?.setScreen(warningScreen)
         } else {
             actionButtonData.isFolder = isFolder
             rebuildWidgets()
@@ -263,7 +263,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
     }
 
     override fun onClose() {
-        minecraft?.setScreen(previousScreen) ?: super.onClose()
+        minecraft?.gui?.setScreen(previousScreen) ?: super.onClose()
     }
 
     override fun isPauseScreen(): Boolean = false

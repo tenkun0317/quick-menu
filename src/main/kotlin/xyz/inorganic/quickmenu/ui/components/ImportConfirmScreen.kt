@@ -67,7 +67,7 @@ class ImportConfirmScreen(
     }
 
     override fun onClose() {
-        minecraft?.setScreen(previousScreen)
+        minecraft?.gui?.setScreen(previousScreen)
     }
 
     override fun isPauseScreen(): Boolean = false

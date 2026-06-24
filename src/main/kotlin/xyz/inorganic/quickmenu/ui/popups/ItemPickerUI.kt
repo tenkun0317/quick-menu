@@ -93,7 +93,7 @@ class ItemPickerUI : Screen(Component.empty()) {
 
     override fun onClose() {
         onSelectedItem.accept(selectedItem)
-        minecraft?.setScreen(previousScreen)
+        minecraft?.gui?.setScreen(previousScreen)
     }
 
     override fun isPauseScreen(): Boolean = false

@@ -133,7 +133,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             }.pos(menuX, editorY).size(menuWidth / 2 - 2, 20).build())
 
             addRenderableWidget(Button.builder(Component.literal("Settings")) {
-                minecraft?.setScreen(ModMenuIntegration().getModConfigScreenFactory().create(this))
+                minecraft?.gui?.setScreen(ModMenuIntegration().getModConfigScreenFactory().create(this))
             }.pos(menuX + menuWidth / 2 + 2, editorY).size(menuWidth / 2 - 2, 20).build())
 
             addRenderableWidget(Button.builder(Component.translatable("menu.main.button.export")) {
@@ -180,7 +180,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                     val modeScreen = ImportConfirmScreen(previewCount, { selectedMode ->
                         runImportWithMode(raw, selectedMode)
                     }, this)
-                    minecraft?.setScreen(modeScreen)
+                    minecraft?.gui?.setScreen(modeScreen)
                 } else {
                     val modeLabelKey = when (defaultMode) {
                         ModConfig.ImportMode.REPLACE_ALL -> "menu.main.import.mode.replace_all"
@@ -193,9 +193,9 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                         if (confirmed) {
                             runImportWithMode(raw, defaultMode)
                         }
-                        minecraft?.setScreen(this)
+                        minecraft?.gui?.setScreen(this)
                     }, Component.translatable("menu.main.import.confirm.title"), Component.translatable("menu.main.import.confirm.message.with_mode", previewCount, modeLabel))
-                    minecraft?.setScreen(confirmScreen)
+                    minecraft?.gui?.setScreen(confirmScreen)
                 }
             }
         }
@@ -284,7 +284,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                             if (!visibleLevels.contains(index)) index to data.name else null
                         }
                         if (omitted.isNotEmpty()) {
-                            minecraft?.setScreen(BreadcrumbPopupUI(omitted, {
+                            minecraft?.gui?.setScreen(BreadcrumbPopupUI(omitted, {
                                 navigateToLevel(it)
                                 scrollOffset = 0
                                 rebuildWidgets()
@@ -574,7 +574,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             rebuildWidgets()
         } else {
             data.run()
-            if (QuickMenu.CONFIG.closeOnAction) minecraft?.setScreen(null)
+            if (QuickMenu.CONFIG.closeOnAction) minecraft?.gui?.setScreen(null)
         }
     }
 
@@ -605,9 +605,9 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             if (confirmed) {
                 performDelete(data)
             }
-            minecraft?.setScreen(this)
+            minecraft?.gui?.setScreen(this)
         }, Component.translatable("menu.main.delete.confirm.title"), Component.translatable("menu.main.delete.confirm.message", data.name))
-        minecraft?.setScreen(confirmScreen)
+        minecraft?.gui?.setScreen(confirmScreen)
     }
 
     private fun performDelete(data: ActionButtonData) {
@@ -632,7 +632,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private fun gotoActionEditor(action: ActionButtonData?) {
         val actionEditor = ActionEditorUI(action)
         actionEditor.previousScreen = this
-        minecraft?.setScreen(actionEditor)
+        minecraft?.gui?.setScreen(actionEditor)
     }
 
     private fun handleReleaseAction() {
@@ -641,7 +641,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             val data = buttonDataMap[btn]
             if (data != null && !data.isFolder) handleLeftClick(data)
         }
-        minecraft?.setScreen(null)
+        minecraft?.gui?.setScreen(null)
     }
 
     override fun keyPressed(event: KeyEvent): Boolean {

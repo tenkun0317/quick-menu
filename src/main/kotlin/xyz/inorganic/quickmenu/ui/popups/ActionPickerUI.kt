@@ -42,7 +42,7 @@ class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")
     }
 
     override fun onClose() {
-        minecraft?.setScreen(previousScreen)
+        minecraft?.gui?.setScreen(previousScreen)
     }
 
     override fun isPauseScreen(): Boolean = false

@@ -14,7 +14,7 @@ object KeybindManager {
     fun onClientTick(client: Minecraft) {
         handleMenuKey(client)
         
-        if (client.screen == null) {
+        if (client.gui.screen() == null) {
             handleActionKeys(client)
         }
 
@@ -24,10 +24,10 @@ object KeybindManager {
     private fun handleMenuKey(client: Minecraft) {
         if (ModKeybindings.menuOpenKeybinding.isDown) {
             if (!menuKeyPressed) {
-                client.setScreen(MainUI())
+                client.gui.setScreen(MainUI())
             }
             menuKeyPressed = true
-        } else if (client.screen == null) {
+        } else if (client.gui.screen() == null) {
             menuKeyPressed = false
         }
     }

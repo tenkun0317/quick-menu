@@ -68,7 +68,7 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
                             actionButtonData.actions[index] = KeybindActionData(mapping.name)
                             init()
                         }
-                        minecraft?.setScreen(picker)
+                        minecraft?.gui?.setScreen(picker)
                     }.pos(menuX + 10, rowY).size(190, 20).build()
                     addRenderableWidget(kbBtn)
                 }
@@ -89,7 +89,7 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
                     actionButtonData.actions.add(selected)
                     init()
                 }
-                minecraft?.setScreen(picker)
+                minecraft?.gui?.setScreen(picker)
             }.pos(menuX + 10, addActionY).size(80, 20).build())
         }
     }
@@ -181,7 +181,7 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
     }
 
     override fun onClose() {
-        minecraft?.setScreen(previousScreen)
+        minecraft?.gui?.setScreen(previousScreen)
     }
 
     override fun isPauseScreen(): Boolean = false

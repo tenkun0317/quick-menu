@@ -29,7 +29,7 @@ class ActionManager(
             }
             onConfirm()
         }, Component.translatable("menu.main.delete.confirm.title"), Component.translatable("menu.main.delete.confirm.message", data.name))
-        Minecraft.getInstance().setScreen(confirmScreen)
+        Minecraft.getInstance().gui.setScreen(confirmScreen)
     }
 
     private fun performDelete(data: ActionButtonData, isSearching: Boolean) {
