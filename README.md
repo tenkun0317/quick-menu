@@ -48,7 +48,7 @@ A Fabric mod for Minecraft that lets you register commands and keybindings to bu
 
 ## Technical Specs
 
-- **Dependencies**: Fabric Loader, Fabric API
+- **Dependencies**: Fabric Loader, Fabric API, Fabric Language Kotlin
 - **Recommended**: YACL, ModMenu
 - **Language**: Kotlin
 - **Data storage**: JSON (Global)

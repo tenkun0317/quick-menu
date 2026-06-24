@@ -48,7 +48,7 @@ Minecraft用 Fabric MOD。繰り返し実行するコマンドやキーバイン
 
 ## 技術仕様
 
-- **依存**: Fabric Loader, Fabric API
+- **依存**: Fabric Loader, Fabric API, Fabric Language Kotlin
 - **推奨**: YACL, ModMenu
 - **言語**: Kotlin
 - **データ保存**: JSON (Global)
