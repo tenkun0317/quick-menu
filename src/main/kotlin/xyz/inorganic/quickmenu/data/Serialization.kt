@@ -3,12 +3,10 @@ package xyz.inorganic.quickmenu.data
 import kotlinx.serialization.Serializable
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.resources.Identifier
 import net.minecraft.world.item.ItemStack
 import xyz.inorganic.quickmenu.data.command_actions.ActionData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
-import java.util.*
 
 @Serializable
 data class ActionButtonDataJSON(
@@ -40,19 +38,7 @@ data class ActionButtonDataJSON(
         }.toMutableList()
         
         if (icon != null) {
-            try {
-                val identifier = Identifier.parse(icon)
-                val itemOptional = BuiltInRegistries.ITEM.get(identifier)
-                var stack = ItemStack.EMPTY
-                if (itemOptional.isPresent) {
-                    stack = ItemStack(itemOptional.get())
-                }
-                if (customModelData != null && customModelData.isNotEmpty()) {
-                    val cmdValues = ActionButtonData.CustomModelDataValues(customModelData)
-                    stack.set(DataComponents.CUSTOM_MODEL_DATA, cmdValues.getComponent())
-                }
-                data.icon = stack
-            } catch (ignored: Exception) {}
+            data.setIconFromLoad(ItemStack.EMPTY, icon, customModelData)
         }
 
         data.children = children.map { it.toActionButtonData() }.toMutableList()
@@ -68,12 +54,12 @@ fun ActionButtonData.toJSON(): ActionButtonDataJSON {
     
     val iconStr = if (!icon.isEmpty) {
         BuiltInRegistries.ITEM.getKey(icon.item).toString()
-    } else null
+    } else iconString
     
     val cmdStr = if (!icon.isEmpty) {
         val cmd = icon.get(DataComponents.CUSTOM_MODEL_DATA)
         if (cmd != null && cmd.strings().isNotEmpty()) cmd.strings()[0] else null
-    } else null
+    } else customModelDataString
     
     return ActionButtonDataJSON(
         name = name,
