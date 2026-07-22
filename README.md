@@ -4,7 +4,7 @@
 
 A Fabric mod for Minecraft that lets you register commands and keybindings to buttons and execute them quickly from a menu.
 
-**A reconstruction of the original Fork by ImCodist, built without heavy dependencies like `owo-lib`.**
+**A reconstruction of the original Fork by ImCodist.**
 
 ---
 
@@ -20,18 +20,20 @@ A Fabric mod for Minecraft that lets you register commands and keybindings to bu
 | **Quick delete** | Shift+click in edit mode |
 | **Release to execute** | Execute action the moment you release the key |
 | **Import / Export** | Share button layouts via clipboard (JSON + Base64) |
+| **Radial menu (R key)** | Open a radial menu of registered actions for fast mouse-driven selection |
 
 ---
 
 ## Usage
 
-1. **Open menu**: `G` (default)
+1. **Open menu**: `G` (default) — press again to close
 2. **Edit mode**: `E` key or pencil icon
 3. **Search**: `F` key or magnifying glass icon
 4. **Navigate folders**: Click folder icon
 5. **Go back**: Click `Root` in the breadcrumb list
 6. **Export**: In edit mode, click `Export` to copy your button layout to the clipboard
 7. **Import**: In edit mode, click `Import` to load a layout from the clipboard (mode selectable)
+8. **Radial menu**: `R` key (default). Mark actions as radial in the editor to include them, then hold to open and select/release to execute
 
 ---
 
@@ -43,6 +45,12 @@ A Fabric mod for Minecraft that lets you register commands and keybindings to bu
 - Close after action execution
 - Hide edit icon
 - Default import mode (`Ask Each Time` / `Replace All` / `Merge by Name` / `Add Only`)
+- **Radial menu**
+  - Max items per page (1–16)
+  - Display mode (`Static` / `Dynamic`)
+  - Radius
+  - Dead-zone radius
+  - Close on action
 
 ---
 
