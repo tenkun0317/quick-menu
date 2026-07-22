@@ -39,6 +39,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private val buttonDataMap = mutableMapOf<QuickMenuButton, ActionButtonData>()
     private var isDraggingScrollbar = false
     private var firstInit = true
+    private var suppressNextChar = false
 
     override fun init() {
         val config = QuickMenu.CONFIG
@@ -104,7 +105,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             val btnY = startY + row * rowHeight - scrollOffset
 
             if (btnY >= startY && btnY + 26 <= startY + visibleAreaHeight) {
-                val button = QuickMenuButton(data.icon, { handleLeftClick(data) }, { handleRightClick(data) }, data.isFolder)
+                val button = QuickMenuButton(data.icon, { handleLeftClick(data) }, { handleRightClick(data) }, data.isFolder, data.registeredForRadial)
                 button.x = btnX
                 button.y = btnY
                 button.setTooltip(Tooltip.create(Component.literal(data.name)))
@@ -633,13 +634,13 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     override fun keyPressed(event: KeyEvent): Boolean {
-        if (ModKeybindings.searchKeybind.matches(event) && (event.modifiers() and GLFW.GLFW_MOD_CONTROL) != 0) {
-            isSearching = !isSearching
-            if (!isSearching && ::searchBox.isInitialized) searchBox.value = ""
+        if (ModKeybindings.searchKeybind.matches(event) && !isSearching) {
+            isSearching = true
+            suppressNextChar = true
             rebuildWidgets()
             return true
         }
-        if (ModKeybindings.editModeKeybind.matches(event)) {
+        if (ModKeybindings.editModeKeybind.matches(event) && !isSearching) {
             editMode = !editMode
             rebuildWidgets()
             return true
@@ -657,6 +658,16 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             return true
         }
         return super.keyPressed(event)
+    }
+
+    override fun charTyped(event: net.minecraft.client.input.CharacterEvent): Boolean {
+        val codePoint = event.codepoint()
+        if (suppressNextChar && (codePoint == 'f'.code || codePoint == 'F'.code)) {
+            suppressNextChar = false
+            return true
+        }
+        suppressNextChar = false
+        return super.charTyped(event)
     }
 
     override fun keyReleased(event: KeyEvent): Boolean {

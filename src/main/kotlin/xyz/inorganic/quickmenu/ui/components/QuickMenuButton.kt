@@ -14,7 +14,8 @@ class QuickMenuButton(
     var itemIcon: ItemStack = ItemStack.EMPTY,
     onPress: OnPress,
     var onRightClick: Consumer<QuickMenuButton> = Consumer {},
-    var isFolder: Boolean = false
+    var isFolder: Boolean = false,
+    var registeredForRadial: Boolean = false
 ) : Button(0, 0, 26, 26, Component.empty(), onPress, DEFAULT_NARRATION) {
 
     private val FOLDER_ICON = Identifier.fromNamespaceAndPath("quickmenu", "textures/folder_icon.png")
@@ -42,6 +43,16 @@ class QuickMenuButton(
             graphics.fill(fx, fy + 1, fx + 3, fy + 2, fColor)
 
             renderOutline(graphics, fx - 1, fy, 10, 8, 0x88000000.toInt())
+        }
+
+        if (registeredForRadial) {
+            val rx = x + width - 9
+            val ry = y + height - 9
+            val rColor = 0xFF00FFAA.toInt()
+            graphics.fill(rx, ry, rx + 8, ry + 8, rColor)
+            graphics.fill(rx + 2, ry + 1, rx + 6, ry + 3, 0xFF000000.toInt())
+            graphics.fill(rx + 1, ry + 3, rx + 3, ry + 7, 0xFF000000.toInt())
+            graphics.fill(rx + 5, ry + 3, rx + 7, ry + 7, 0xFF000000.toInt())
         }
     }
 

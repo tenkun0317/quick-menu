@@ -8,6 +8,7 @@ import dev.isxander.yacl3.api.YetAnotherConfigLib
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder
 import dev.isxander.yacl3.api.controller.EnumControllerBuilder
 import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.QuickMenu
@@ -87,6 +88,49 @@ class ModMenuIntegration : ModMenuApi {
                             .enumClass(ModConfig.ImportMode::class.java)
                     }
                     .binding(ModConfig.ImportMode.ASK, { config.defaultImportMode }, { config.defaultImportMode = it })
+                    .build())
+                .build())
+            .category(ConfigCategory.createBuilder()
+                .name(Component.translatable("text.config.quickmenu.section.radial"))
+                .option(Option.createBuilder<Int>()
+                    .name(Component.translatable("text.config.quickmenu.option.radialMaxItems"))
+                    .controller { opt ->
+                        IntegerSliderControllerBuilder.create(opt)
+                            .range(1, 16)
+                            .step(1)
+                    }
+                    .binding(8, { config.radialMaxItems }, { config.radialMaxItems = it })
+                    .build())
+                .option(Option.createBuilder<ModConfig.RadialDisplayMode>()
+                    .name(Component.translatable("text.config.quickmenu.option.radialDisplayMode"))
+                    .controller { opt ->
+                        EnumControllerBuilder.create(opt)
+                            .enumClass(ModConfig.RadialDisplayMode::class.java)
+                    }
+                    .binding(ModConfig.RadialDisplayMode.STATIC, { config.radialDisplayMode }, { config.radialDisplayMode = it })
+                    .build())
+                .option(Option.createBuilder<Int>()
+                    .name(Component.translatable("text.config.quickmenu.option.radialRadius"))
+                    .controller { opt ->
+                        IntegerSliderControllerBuilder.create(opt)
+                            .range(30, 150)
+                            .step(5)
+                    }
+                    .binding(60, { config.radialRadius }, { config.radialRadius = it })
+                    .build())
+                .option(Option.createBuilder<Int>()
+                    .name(Component.translatable("text.config.quickmenu.option.radialDeadZoneRadius"))
+                    .controller { opt ->
+                        IntegerSliderControllerBuilder.create(opt)
+                            .range(5, 50)
+                            .step(5)
+                    }
+                    .binding(15, { config.radialDeadZoneRadius }, { config.radialDeadZoneRadius = it })
+                    .build())
+                .option(Option.createBuilder<Boolean>()
+                    .name(Component.translatable("text.config.quickmenu.option.radialCloseOnAction"))
+                    .controller { BooleanControllerBuilder.create(it) }
+                    .binding(true, { config.radialCloseOnAction }, { config.radialCloseOnAction = it })
                     .build())
                 .build())
             .build()

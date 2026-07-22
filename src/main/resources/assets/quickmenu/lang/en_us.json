@@ -7,6 +7,7 @@
   "key.quickmenu.edit_mode": "Edit Mode",
   "key.quickmenu.navigate_back": "Navigate Back",
   "key.quickmenu.close_search": "Close Search",
+  "key.quickmenu.radial_open": "Open Radial Menu",
 
 
   "menu.main.title": "Quick Menu",
@@ -53,6 +54,7 @@
   "menu.editor.property.keybind": "Keybind",
   "menu.editor.property.custommodeldata": "Custom Model Data",
   "menu.editor.property.new_action": "New Action",
+  "menu.editor.property.radial": "Radial",
 
 
   "text.config.quickmenu.title": "Quick Menu Config",
@@ -83,5 +85,16 @@
   "text.config.quickmenu.option.importMode.value.ask": "Ask Each Time",
   "text.config.quickmenu.option.importMode.value.replace_all": "Replace All",
   "text.config.quickmenu.option.importMode.value.merge_by_name": "Merge by Name",
-  "text.config.quickmenu.option.importMode.value.add_only": "Add Only"
+  "text.config.quickmenu.option.importMode.value.add_only": "Add Only",
+
+  "menu.radial.title": "Quick Menu (Radial)",
+
+  "text.config.quickmenu.section.radial": "Radial Menu",
+  "text.config.quickmenu.option.radialMaxItems": "Max Items per Page",
+  "text.config.quickmenu.option.radialDisplayMode": "Display Mode",
+  "text.config.quickmenu.option.radialDisplayMode.value.static": "Static",
+  "text.config.quickmenu.option.radialDisplayMode.value.dynamic": "Dynamic",
+  "text.config.quickmenu.option.radialRadius": "Radius",
+  "text.config.quickmenu.option.radialDeadZoneRadius": "Dead Zone Radius",
+  "text.config.quickmenu.option.radialCloseOnAction": "Close on Action"
 }

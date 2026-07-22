@@ -36,7 +36,7 @@ class ActionButtonGrid {
             val btnY = startY + row * rowHeight - scrollOffset
 
             if (btnY >= startY && btnY + 26 <= startY + visibleAreaHeight) {
-                val button = QuickMenuButton(data.icon, { onLeftClick(data) }, { onRightClick(data) }, data.isFolder)
+                val button = QuickMenuButton(data.icon, { onLeftClick(data) }, { onRightClick(data) }, data.isFolder, data.registeredForRadial)
                 button.x = btnX
                 button.y = btnY
                 button.setTooltip(Tooltip.create(Component.literal(data.name)))

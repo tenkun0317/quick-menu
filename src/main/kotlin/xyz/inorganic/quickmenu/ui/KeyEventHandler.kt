@@ -27,7 +27,7 @@ class KeyEventHandler(
 
     fun handleKeyPressed(event: net.minecraft.client.input.KeyEvent): Boolean {
         return when {
-            event.key() == GLFW.GLFW_KEY_F && (event.modifiers() and GLFW.GLFW_MOD_CONTROL != 0) -> {
+            event.key() == GLFW.GLFW_KEY_F -> {
                 keyState.isSearching = !keyState.isSearching
                 if (!keyState.isSearching) onSearchClear()
                 onRebuild()

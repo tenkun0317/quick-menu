@@ -17,7 +17,8 @@ class ActionButtonData(
     icon: ItemStack = ItemStack.EMPTY,
     keybind: MutableList<Int> = mutableListOf(),
     var isFolder: Boolean = false,
-    var children: MutableList<ActionButtonData> = mutableListOf()
+    var children: MutableList<ActionButtonData> = mutableListOf(),
+    var registeredForRadial: Boolean = false
 ) {
     var keyPressed = false
 

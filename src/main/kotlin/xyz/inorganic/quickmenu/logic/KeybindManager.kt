@@ -1,18 +1,23 @@
 package xyz.inorganic.quickmenu.logic
 
 import net.minecraft.client.Minecraft
+import xyz.inorganic.quickmenu.mixins.KeyBindingMixin
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
 import xyz.inorganic.quickmenu.other.KeybindHandler
 import xyz.inorganic.quickmenu.other.ModKeybindings
 import xyz.inorganic.quickmenu.ui.MainUI
+import xyz.inorganic.quickmenu.ui.RadialMenuUI
 import org.lwjgl.glfw.GLFW
 import com.mojang.blaze3d.platform.InputConstants
 
 object KeybindManager {
     private var menuKeyPressed = false
+    private var radialKeyPressed = false
+    private var radialHoveredAction: xyz.inorganic.quickmenu.data.ActionButtonData? = null
 
     fun onClientTick(client: Minecraft) {
         handleMenuKey(client)
+        handleRadialKey(client)
         
         if (client.gui.screen() == null) {
             handleActionKeys(client)
@@ -22,13 +27,38 @@ object KeybindManager {
     }
 
     private fun handleMenuKey(client: Minecraft) {
-        if (ModKeybindings.menuOpenKeybinding.isDown) {
+        val rawKey = (ModKeybindings.menuOpenKeybinding as KeyBindingMixin).key
+        val isDown = InputConstants.isKeyDown(client.window, rawKey.value)
+
+        if (isDown) {
             if (!menuKeyPressed) {
-                client.gui.setScreen(MainUI())
+                if (client.gui.screen() is MainUI) {
+                    client.gui.setScreen(null)
+                } else {
+                    client.gui.setScreen(MainUI())
+                }
+                menuKeyPressed = true
             }
-            menuKeyPressed = true
-        } else if (client.gui.screen() == null) {
+        } else {
             menuKeyPressed = false
+        }
+    }
+
+    private fun handleRadialKey(client: Minecraft) {
+        val rawKey = (ModKeybindings.radialOpenKeybinding as KeyBindingMixin).key
+        val isDown = InputConstants.isKeyDown(client.window, rawKey.value)
+
+        if (isDown) {
+            if (!radialKeyPressed && client.gui.screen() == null) {
+                client.gui.setScreen(RadialMenuUI())
+            }
+            radialKeyPressed = true
+        } else {
+            if (client.gui.screen() is RadialMenuUI) {
+                val screen = client.gui.screen() as RadialMenuUI
+                screen.handleKeyRelease()
+            }
+            radialKeyPressed = false
         }
     }
 

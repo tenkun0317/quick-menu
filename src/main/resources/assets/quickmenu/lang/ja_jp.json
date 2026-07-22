@@ -7,6 +7,7 @@
   "key.quickmenu.edit_mode": "編集モード",
   "key.quickmenu.navigate_back": "戻る",
   "key.quickmenu.close_search": "検索を閉じる",
+  "key.quickmenu.radial_open": "ラジアルメニューを開く",
 
 
   "menu.main.title": "Quick Menu",
@@ -84,5 +85,17 @@
   "text.config.quickmenu.option.importMode.value.ask": "毎回選択する",
   "text.config.quickmenu.option.importMode.value.replace_all": "すべて置き換え",
   "text.config.quickmenu.option.importMode.value.merge_by_name": "名前一致で置き換え+追加",
-  "text.config.quickmenu.option.importMode.value.add_only": "追加のみ"
+  "text.config.quickmenu.option.importMode.value.add_only": "追加のみ",
+
+  "menu.radial.title": "Quick Menu (ラジアル)",
+  "menu.editor.property.radial": "ラジアル",
+
+  "text.config.quickmenu.section.radial": "ラジアルメニュー",
+  "text.config.quickmenu.option.radialMaxItems": "1ページあたりの最大数",
+  "text.config.quickmenu.option.radialDisplayMode": "表示モード",
+  "text.config.quickmenu.option.radialDisplayMode.value.static": "静的",
+  "text.config.quickmenu.option.radialDisplayMode.value.dynamic": "動的",
+  "text.config.quickmenu.option.radialRadius": "半径",
+  "text.config.quickmenu.option.radialDeadZoneRadius": "デッドゾーン半径",
+  "text.config.quickmenu.option.radialCloseOnAction": "実行時に閉じる"
 }

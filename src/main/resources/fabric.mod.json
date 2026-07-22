@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "quickmenu",
+	"id": "${id}",
 	"version": "${version}",
-	"name": "Quick Menu (Renewed)",
+	"name": "${name}",
 	"description": "A modernized, lightweight configurable menu for commands and keybindings. Rebuilt for performance and stability.",
 	"authors": [
 		{
@@ -33,7 +33,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.19.3",
-		"minecraft": ">=26.2",
+		"minecraft": "${minecraft}",
 		"java": ">=25",
 		"fabric-api": "*",
 		"fabric-language-kotlin": ">=1.13.0"

@@ -14,6 +14,10 @@ class ModConfig {
         ASK, REPLACE_ALL, MERGE_BY_NAME, ADD_ONLY
     }
 
+    enum class RadialDisplayMode {
+        STATIC, DYNAMIC
+    }
+
     // Menu size based on button counts
     var buttonsPerRow: Int = 5
     var visibleRows: Int = 2
@@ -34,6 +38,13 @@ class ModConfig {
     // Edit mode modifiers (Stored as key name strings)
     var moveModifier: String = "key.keyboard.left.control"
     var deleteModifier: String = "key.keyboard.left.shift"
+
+    // Radial menu settings
+    var radialMaxItems: Int = 8
+    var radialDisplayMode: RadialDisplayMode = RadialDisplayMode.STATIC
+    var radialRadius: Int = 60
+    var radialDeadZoneRadius: Int = 15
+    var radialCloseOnAction: Boolean = true
 
     // Helper methods for backward compatibility if needed
     fun buttonsPerRow(): Int = buttonsPerRow

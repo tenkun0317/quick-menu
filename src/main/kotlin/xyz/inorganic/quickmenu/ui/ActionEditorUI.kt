@@ -28,6 +28,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
     private lateinit var customModelDataEditBox: EditBox
     private lateinit var keybindBtn: Button
     private lateinit var folderCheckbox: Checkbox
+    private lateinit var radialCheckbox: Checkbox
 
     private var settingKeybind = false
     private var isBoundKeybind = false
@@ -40,7 +41,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
 
     init {
         originalAction?.let {
-            actionButtonData = ActionButtonData(it.name, it.actions.toMutableList(), it.icon.copy(), it.keybind.toMutableList(), it.isFolder, it.children.toMutableList())
+            actionButtonData = ActionButtonData(it.name, it.actions.toMutableList(), it.icon.copy(), it.keybind.toMutableList(), it.isFolder, it.children.toMutableList(), it.registeredForRadial)
             keybind.addAll(it.keybind)
             if (keybind.size >= 4) isBoundKeybind = true
             isNewAction = false
@@ -91,13 +92,22 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
             .build()
         addRenderableWidget(folderCheckbox)
 
+        radialCheckbox = Checkbox.builder(Component.translatable("menu.editor.property.radial"), font)
+            .pos(menuX + 100, menuY + 120)
+            .selected(actionButtonData.registeredForRadial)
+            .onValueChange { _, value ->
+                actionButtonData.registeredForRadial = value
+            }
+            .build()
+        addRenderableWidget(radialCheckbox)
+
         if (!actionButtonData.isFolder) {
             addRenderableWidget(Button.builder(Component.literal("Edit Actions >")) {
                 syncInputToData()
                 val listEditor = ActionListEditorUI(actionButtonData)
                 listEditor.previousScreen = this
                 minecraft?.gui?.setScreen(listEditor)
-            }.pos(menuX + 100, menuY + 120).size(140, 20).build())
+            }.pos(menuX + 160, menuY + 120).size(80, 20).build())
         }
 
         val footerY = menuY + menuHeight + 5
@@ -191,6 +201,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                 it.actions = actionButtonData.actions
                 it.icon = actionButtonData.icon
                 it.keybind = actionButtonData.keybind
+                it.registeredForRadial = actionButtonData.registeredForRadial
 
                 if (it.isFolder && !actionButtonData.isFolder && actionButtonData.children.isNotEmpty()) {
                     val index = parentList.indexOf(it)
