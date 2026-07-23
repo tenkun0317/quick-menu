@@ -34,7 +34,7 @@ object KeybindManager {
             if (!menuKeyPressed) {
                 if (client.gui.screen() is MainUI) {
                     client.gui.setScreen(null)
-                } else {
+                } else if (client.gui.screen() == null) {
                     client.gui.setScreen(MainUI())
                 }
                 menuKeyPressed = true
