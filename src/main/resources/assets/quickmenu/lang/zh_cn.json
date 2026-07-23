@@ -7,7 +7,9 @@
   "key.quickmenu.edit_mode": "编辑模式",
   "key.quickmenu.navigate_back": "返回",
   "key.quickmenu.close_search": "关闭搜索",
+  "key.quickmenu.radial_open": "打开径向菜单",
 
+  
   "menu.main.title": "quickmenu",
   "menu.main.no_actions": "未创建任何操作。",
   "menu.main.button.add_action": "添加操作",
@@ -39,6 +41,7 @@
 
   "menu.action_picker.select": " > ",
 
+  
   "menu.editor.title": "操作编辑器",
   "menu.editor.button.finish": "完成",
   "menu.editor.button.cancel": "取消",
@@ -52,6 +55,7 @@
   "menu.editor.property.custommodeldata": "自定义模型数据",
   "menu.editor.property.new_action": "新建操作",
 
+  
   "text.config.quickmenu.title": "quickmenu 配置",
 
   "text.config.quickmenu.section.menu": "菜单",
@@ -71,6 +75,8 @@
   "text.config.quickmenu.option.modifier.shift": "Shift",
   "text.config.quickmenu.option.modifier.alt": "Alt",
 
+  "text.config.quickmenu.option.displayRunText": "显示执行文本",
+  
   "text.config.quickmenu.option.displayRunText.value.always": "始终",
   "text.config.quickmenu.option.displayRunText.value.keybind_only": "仅 keybind",
   "text.config.quickmenu.option.displayRunText.value.never": "从不",
@@ -79,5 +85,17 @@
   "text.config.quickmenu.option.importMode.value.ask": "每次询问",
   "text.config.quickmenu.option.importMode.value.replace_all": "全部替换",
   "text.config.quickmenu.option.importMode.value.merge_by_name": "按名称合并+添加",
-  "text.config.quickmenu.option.importMode.value.add_only": "仅添加"
+  "text.config.quickmenu.option.importMode.value.add_only": "仅添加",
+
+  "menu.radial.title": "快速菜单 (径向)",
+  "menu.editor.property.radial": "径向",
+
+  "text.config.quickmenu.section.radial": "径向菜单",
+  "text.config.quickmenu.option.radialMaxItems": "每页最大数量",
+  "text.config.quickmenu.option.radialDisplayMode": "显示模式",
+  "text.config.quickmenu.option.radialDisplayMode.value.static": "静态",
+  "text.config.quickmenu.option.radialDisplayMode.value.dynamic": "动态",
+  "text.config.quickmenu.option.radialRadius": "半径",
+  "text.config.quickmenu.option.radialDeadZoneRadius": "死区半径",
+  "text.config.quickmenu.option.radialCloseOnAction": "运行时关闭"
 }
