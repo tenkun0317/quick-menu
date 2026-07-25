@@ -69,9 +69,7 @@ object KeybindManager {
             
             if (keybind.size >= 4) {
                 if (keybind[3] == 0) {
-                    // Keyboard
                     actionData.getKey()?.let { key ->
-                        // isKeyDown takes Window object in 1.21.x
                         if (InputConstants.isKeyDown(client.window, key.value)) {
                             val mods = keybind[2]
                             val reqCtrl = (mods and GLFW.GLFW_MOD_CONTROL != 0)
@@ -93,7 +91,6 @@ object KeybindManager {
                         }
                     }
                 } else {
-                    // Mouse
                     val pressed = when (keybind[0]) {
                         0 -> client.mouseHandler.isLeftPressed
                         1 -> client.mouseHandler.isRightPressed

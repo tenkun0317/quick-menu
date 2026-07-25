@@ -37,6 +37,9 @@ dependencies {
     modImplementation("maven.modrinth:1eAoo2KR:${yacl}")
     modImplementation("com.terraformersmc:modmenu:${modMenu}")
     implementation("com.google.code.gson:gson:${property("deps.gson")}")
+    if (sc.current.version == "1.21.11") {
+        modImplementation(include("org.quiltmc.parsers:gson:0.2.1")!!)
+    }
 }
 
 loom {
@@ -51,13 +54,15 @@ loom {
 
 java {
     withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    val javaVersion = if (sc.current.version == "1.21.11") JavaVersion.VERSION_21 else JavaVersion.VERSION_25
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
+        val jvm = if (sc.current.version == "1.21.11") org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21 else org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
+        jvmTarget.set(jvm)
     }
 }
 
@@ -72,11 +77,12 @@ tasks.processResources {
         register("name", "mod.name")
         register("version", "mod.version")
         register("minecraft", "mod.mc_compat")
+        put("java_version", if (sc.current.version == "1.21.11") ">=21" else ">=25")
     }
 
     filesMatching("fabric.mod.json") { expand(props) }
 
-    val mixinJava = "JAVA_25"
+    val mixinJava = if (sc.current.version == "1.21.11") "JAVA_21" else "JAVA_25"
     filesMatching("*.mixins.json") { expand("java" to mixinJava) }
 }
 

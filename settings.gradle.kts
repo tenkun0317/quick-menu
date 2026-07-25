@@ -13,16 +13,16 @@ plugins {
     id("dev.kikugie.stonecutter") version "0.9.6"
     id("dev.kikugie.loom-back-compat") version "0.4"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-    kotlin("jvm") version "2.4.0" apply false
-    kotlin("plugin.serialization") version "2.4.0" apply false
-    kotlin("kapt") version "2.4.0" apply false
+    kotlin("jvm") version "2.4.10" apply false
+    kotlin("plugin.serialization") version "2.4.10" apply false
+    kotlin("kapt") version "2.4.10" apply false
 }
 
-stonecutter {
-    create(rootProject) {
-        versions("26.1", "26.2")
-        vcsVersion = "26.2"
+    stonecutter {
+        create(rootProject) {
+            versions("26.1", "26.2", "1.21.11")
+            vcsVersion = "26.2"
+        }
     }
-}
 
 rootProject.name = "Quick Menu"

@@ -12,16 +12,25 @@ deps.gson = "2.11.0"
 mod.mc_compat = ">=26.1"
 mod.mc_releases = ["26.1"]
 
-deps.fabric_api = "0.144.3+26.1"
-deps.yacl = "3.9.0+26.1-fabric"
-deps.mod_menu = "18.0.0-beta.1"
-deps.fabric_language_kotlin = "1.13.9+kotlin.2.3.10"
+deps.fabric_api = "0.155.2+26.1.2"
+deps.yacl = "3.9.6+26.1-fabric"
+deps.mod_menu = "18.0.0"
+deps.fabric_language_kotlin = "1.13.13+kotlin.2.4.10"
 
 ["26.2"]
 mod.mc_compat = ">=26.2"
 mod.mc_releases = ["26.2"]
 
-deps.fabric_api = "0.153.0+26.2"
-deps.yacl = "3.9.5+26.2-fabric"
-deps.mod_menu = "20.0.0-beta.3"
-deps.fabric_language_kotlin = "1.13.12+kotlin.2.4.0"
+deps.fabric_api = "0.155.2+26.2"
+deps.yacl = "3.9.6+26.2-fabric"
+deps.mod_menu = "20.0.1"
+deps.fabric_language_kotlin = "1.13.13+kotlin.2.4.10"
+
+["1.21.11"]
+mod.mc_compat = ">=1.21.11"
+mod.mc_releases = ["1.21.11"]
+
+deps.fabric_api = "0.141.5+1.21.11"
+deps.yacl = "3.8.2+1.21.11-fabric"
+deps.mod_menu = "17.0.1-beta.1"
+deps.fabric_language_kotlin = "1.13.13+kotlin.2.4.10"

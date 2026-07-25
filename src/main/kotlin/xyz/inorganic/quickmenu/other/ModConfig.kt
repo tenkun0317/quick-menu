@@ -18,35 +18,19 @@ class ModConfig {
         STATIC, DYNAMIC
     }
 
-    // Menu size based on button counts
     var buttonsPerRow: Int = 5
     var visibleRows: Int = 2
-    
     var closeOnKeyReleased: Boolean = false
     var hideEditIcon: Boolean = false
-
-    // Action button settings
-    var closeOnAction: Boolean = true
     var showActionsInTooltip: Boolean = true
     var displayRunText: DisplayRunText = DisplayRunText.KEYBIND_ONLY
-    
     var keepNavigationHistory: Boolean = false
-
-    // Import/Export
-    var defaultImportMode: ImportMode = ImportMode.ASK
-
-    // Edit mode modifiers (Stored as key name strings)
-    var moveModifier: String = "key.keyboard.left.control"
     var deleteModifier: String = "key.keyboard.left.shift"
-
-    // Radial menu settings
-    var radialMaxItems: Int = 8
     var radialDisplayMode: RadialDisplayMode = RadialDisplayMode.STATIC
     var radialRadius: Int = 60
     var radialDeadZoneRadius: Int = 15
     var radialCloseOnAction: Boolean = true
 
-    // Helper methods for backward compatibility if needed
     fun buttonsPerRow(): Int = buttonsPerRow
     fun visibleRows(): Int = visibleRows
     fun closeOnKeyReleased(): Boolean = closeOnKeyReleased
