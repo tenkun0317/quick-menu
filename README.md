@@ -4,7 +4,7 @@
 
 A Fabric mod for Minecraft that lets you register commands and keybindings to buttons and execute them quickly from a menu.
 
-**A reconstruction of the original Fork by ImCodist.**
+**A fork that reconstructs the original created by ImCodist.**
 
 ---
 
