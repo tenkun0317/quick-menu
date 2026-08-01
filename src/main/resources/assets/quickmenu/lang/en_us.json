@@ -35,7 +35,7 @@
   "menu.action_picker.command": "Command",
   "menu.action_picker.keybind": "Keybind",
 
-  "text.action.run_feedback": "Ran action \"%s\"",
+  "text.action.run_feedback": "Run action \"%s\"",
   "text.action.key": "Key: %s",
   "menu.main.button.config": "Config",
 
