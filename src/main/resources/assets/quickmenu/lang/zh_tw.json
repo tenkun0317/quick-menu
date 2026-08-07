@@ -34,6 +34,7 @@
   "menu.action_picker.title": "選擇操作類型",
   "menu.action_picker.command": "command",
   "menu.action_picker.keybind": "keybind",
+  "menu.action_picker.sleep": "等待 (Sleep)",
 
   "text.action.run_feedback": "已執行操作 \"%s\"",
   "text.action.key": "Key: %s",

@@ -22,10 +22,14 @@ class ModConfig {
     var visibleRows: Int = 2
     var closeOnKeyReleased: Boolean = false
     var hideEditIcon: Boolean = false
+    var closeOnAction: Boolean = true
     var showActionsInTooltip: Boolean = true
     var displayRunText: DisplayRunText = DisplayRunText.KEYBIND_ONLY
     var keepNavigationHistory: Boolean = false
+    var defaultImportMode: ImportMode = ImportMode.ASK
+    var moveModifier: String = "key.keyboard.left.control"
     var deleteModifier: String = "key.keyboard.left.shift"
+    var radialMaxItems: Int = 8
     var radialDisplayMode: RadialDisplayMode = RadialDisplayMode.STATIC
     var radialRadius: Int = 60
     var radialDeadZoneRadius: Int = 15

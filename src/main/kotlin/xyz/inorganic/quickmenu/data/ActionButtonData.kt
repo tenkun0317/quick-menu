@@ -9,6 +9,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.CustomModelData
 import xyz.inorganic.quickmenu.QuickMenu
 import xyz.inorganic.quickmenu.data.command_actions.ActionData
+import xyz.inorganic.quickmenu.other.ActionExecutor
 import xyz.inorganic.quickmenu.other.ModConfig
 
 class ActionButtonData(
@@ -73,7 +74,7 @@ class ActionButtonData(
             client.player?.sendSystemMessage(Component.literal("Ran action \"$name\""))
         }
 
-        actions.forEach { it.run() }
+        ActionExecutor.submit(this)
     }
 
     class CustomModelDataValues(cmdStr: String) {

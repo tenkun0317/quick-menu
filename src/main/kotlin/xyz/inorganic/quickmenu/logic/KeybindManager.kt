@@ -3,6 +3,7 @@ package xyz.inorganic.quickmenu.logic
 import net.minecraft.client.Minecraft
 import xyz.inorganic.quickmenu.mixins.KeyBindingMixin
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
+import xyz.inorganic.quickmenu.other.ActionExecutor
 import xyz.inorganic.quickmenu.other.KeybindHandler
 import xyz.inorganic.quickmenu.other.ModKeybindings
 import xyz.inorganic.quickmenu.ui.MainUI
@@ -24,6 +25,8 @@ object KeybindManager {
         }
 
         KeybindHandler.runQueue()
+
+        ActionExecutor.advance()
     }
 
     private fun handleMenuKey(client: Minecraft) {

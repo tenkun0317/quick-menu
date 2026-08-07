@@ -3,7 +3,8 @@
 	"package": "xyz.inorganic.quickmenu.mixins",
 	"compatibilityLevel": "${java}",
 	"client": [
-      "KeyBindingMixin"
+      "KeyBindingMixin",
+      "KeyMappingHeldKeysMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

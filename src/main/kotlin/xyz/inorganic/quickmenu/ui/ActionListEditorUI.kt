@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.data.ActionButtonData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
+import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
 import xyz.inorganic.quickmenu.ui.popups.ActionPickerUI
 import xyz.inorganic.quickmenu.ui.popups.KeybindPickerUI
 import kotlin.math.ceil
@@ -18,7 +19,7 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
 
     private var menuX = 0
     private var menuY = 0
-    private var menuWidth = 260
+    private var menuWidth = 290
     private var menuHeight = 180
 
     private var scrollOffset = 0
@@ -65,18 +66,57 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
                         val picker = KeybindPickerUI()
                         picker.previousScreen = this
                         picker.onSelectedKeybind = { mapping ->
-                            actionButtonData.actions[index] = KeybindActionData(mapping.name)
+                            actionButtonData.actions[index] = KeybindActionData(mapping.name, action.mode)
                             init()
                         }
                         minecraft?.gui?.setScreen(picker)
-                    }.pos(menuX + 10, rowY).size(190, 20).build()
+                    }.pos(menuX + 10, rowY).size(130, 20).build()
                     addRenderableWidget(kbBtn)
+
+                    val modeBtn = Button.builder(Component.literal(action.mode.displayName)) {
+                        actionButtonData.actions[index] = KeybindActionData(action.translationKey, action.mode.next())
+                        init()
+                    }.pos(menuX + 145, rowY).size(55, 20).build()
+                    addRenderableWidget(modeBtn)
+                } else if (action is SleepActionData) {
+                    val sleepBox = EditBox(font, menuX + 10, rowY, 190, 20, Component.empty())
+                    sleepBox.value = SleepActionData.formatSeconds(action.ticks)
+                    sleepBox.setMaxLength(10)
+                    sleepBox.setResponder {
+                        actionButtonData.actions[index] = SleepActionData.fromSecondsText(it)
+                    }
+                    addRenderableWidget(sleepBox)
                 }
+
+                val canMoveUp = index > 0
+                val canMoveDown = index < actionButtonData.actions.size - 1
+
+                val upBtn = Button.builder(Component.literal("▲")) {
+                    if (index > 0) {
+                        val tmp = actionButtonData.actions[index - 1]
+                        actionButtonData.actions[index - 1] = actionButtonData.actions[index]
+                        actionButtonData.actions[index] = tmp
+                        init()
+                    }
+                }.pos(menuX + 205, rowY).size(20, 20).build()
+                upBtn.active = canMoveUp
+                addRenderableWidget(upBtn)
+
+                val downBtn = Button.builder(Component.literal("▼")) {
+                    if (index < actionButtonData.actions.size - 1) {
+                        val tmp = actionButtonData.actions[index + 1]
+                        actionButtonData.actions[index + 1] = actionButtonData.actions[index]
+                        actionButtonData.actions[index] = tmp
+                        init()
+                    }
+                }.pos(menuX + 227, rowY).size(20, 20).build()
+                downBtn.active = canMoveDown
+                addRenderableWidget(downBtn)
 
                 addRenderableWidget(Button.builder(Component.literal("-")) {
                     actionButtonData.actions.removeAt(index)
                     init()
-                }.pos(menuX + 205, rowY).size(20, 20).build())
+                }.pos(menuX + 249, rowY).size(20, 20).build())
             }
         }
 

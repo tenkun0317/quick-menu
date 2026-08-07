@@ -34,6 +34,7 @@
   "menu.action_picker.title": "Select Action Type",
   "menu.action_picker.command": "Command",
   "menu.action_picker.keybind": "Keybind",
+  "menu.action_picker.sleep": "Sleep (Wait)",
 
   "text.action.run_feedback": "Ran action \"%s\"",
   "text.action.key": "Key: %s",

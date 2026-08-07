@@ -34,6 +34,7 @@
   "menu.action_picker.title": "アクションの種類を選択",
   "menu.action_picker.command": "コマンド",
   "menu.action_picker.keybind": "キーバインド",
+  "menu.action_picker.sleep": "待機 (Sleep)",
 
   "text.action.run_feedback": "アクション「%s」を実行しました",
   "text.action.key": "キー: %s",

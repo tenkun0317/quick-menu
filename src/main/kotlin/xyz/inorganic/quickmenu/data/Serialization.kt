@@ -7,6 +7,8 @@ import net.minecraft.world.item.ItemStack
 import xyz.inorganic.quickmenu.data.command_actions.ActionData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
+import xyz.inorganic.quickmenu.data.command_actions.KeyPressMode
+import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
 
 @Serializable
 data class ActionButtonDataJSON(
@@ -34,7 +36,8 @@ data class ActionButtonDataJSON(
             
             when (type) {
                 "cmd" -> CommandActionData(value)
-                "key" -> KeybindActionData(value)
+                "key" -> KeybindActionData(value, KeyPressMode.fromId(actionList.getOrNull(2)))
+                "sleep" -> SleepActionData(value.toIntOrNull() ?: 0)
                 else -> null
             }
         }.toMutableList()
@@ -51,7 +54,11 @@ data class ActionButtonDataJSON(
 
 fun ActionButtonData.toJSON(): ActionButtonDataJSON {
     val actionList = actions.map { action ->
-        listOf(action.type, action.value)
+        if (action is KeybindActionData) {
+            listOf(action.type, action.value, action.mode.id)
+        } else {
+            listOf(action.type, action.value)
+        }
     }
     
     val iconStr = if (!icon.isEmpty) {

@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.data.command_actions.ActionData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
+import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
 import java.util.function.Consumer
 
 class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")) {
@@ -16,7 +17,7 @@ class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")
     private var menuX = 0
     private var menuY = 0
     private var menuWidth = 180
-    private var menuHeight = 120
+    private var menuHeight = 150
 
     override fun init() {
         menuX = (width - menuWidth) / 2
@@ -35,6 +36,12 @@ class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")
             onClose()
         }.pos(menuX + 10, startY + 25).size(160, 20).build()
         addRenderableWidget(keybindBtn)
+
+        val sleepBtn = Button.builder(Component.translatable("menu.action_picker.sleep")) {
+            onSelectedAction.accept(SleepActionData(10))
+            onClose()
+        }.pos(menuX + 10, startY + 50).size(160, 20).build()
+        addRenderableWidget(sleepBtn)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {

@@ -15,8 +15,12 @@ stonecutter parameters {
             replace(".gui.screen()", ".screen")
         }
         string(current.version == "1.21.11") {
+            replace("override fun extractRenderState(graphics: GuiGraphicsExtractor", "override fun render(graphics: GuiGraphics")
+            replace("super.extractRenderState(graphics: GuiGraphicsExtractor", "super.render(graphics: GuiGraphics")
+            replace("super.extractRenderState(", "super.render(")
             replace("GuiGraphicsExtractor", "GuiGraphics")
             replace("extractContents", "renderContents")
+            replace("graphics.centeredText(", "graphics.drawCenteredString(")
             replace("""context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, sourceX.toFloat(), sourceY.toFloat(), sourceWidth, sourceHeight, textureWidth, textureHeight)""", """context.blit(TEXTURE, x, y, sourceX, sourceY, sourceWidth.toFloat(), sourceHeight.toFloat(), textureWidth.toFloat(), textureHeight.toFloat())""")
             replace("graphics.text(", "graphics.drawString(")
             replace("graphics.item(", "graphics.renderItem(")
@@ -29,6 +33,7 @@ stonecutter parameters {
             replace("""minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.failure", peek.reason))""", """minecraft?.player?.displayClientMessage(Component.translatable("menu.main.import.failure", peek.reason), false)""")
             replace("""minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.success", result.count))""", """minecraft?.player?.displayClientMessage(Component.translatable("menu.main.import.success", result.count), false)""")
             replace("""minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.failure", result.reason))""", """minecraft?.player?.displayClientMessage(Component.translatable("menu.main.import.failure", result.reason), false)""")
+            replace("""client.player?.sendSystemMessage(Component.literal("Ran action \"${'$'}name\""))""", """client.player?.displayClientMessage(Component.literal("Ran action \"${'$'}name\""), false)""")
         }
     }
 }
