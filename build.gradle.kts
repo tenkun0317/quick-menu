@@ -33,6 +33,8 @@ dependencies {
     val yacl: String = sc.properties["deps.yacl"]
     val modMenu: String = sc.properties["deps.mod_menu"]
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabricApi}")
+    val keyMappingApi: String = sc.properties["deps.key_mapping_api"]
+    modImplementation("net.fabricmc.fabric-api:${keyMappingApi}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${fabricLanguageKotlin}")
     modImplementation("maven.modrinth:1eAoo2KR:${yacl}")
     modImplementation("com.terraformersmc:modmenu:${modMenu}")

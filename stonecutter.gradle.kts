@@ -15,6 +15,8 @@ stonecutter parameters {
             replace(".gui.screen()", ".screen")
         }
         string(current.version == "1.21.11") {
+            replace("net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper", "net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper")
+            replace("KeyMappingHelper.registerKeyMapping(", "KeyBindingHelper.registerKeyBinding(")
             replace("override fun extractRenderState(graphics: GuiGraphicsExtractor", "override fun render(graphics: GuiGraphics")
             replace("super.extractRenderState(graphics: GuiGraphicsExtractor", "super.render(graphics: GuiGraphics")
             replace("super.extractRenderState(", "super.render(")
