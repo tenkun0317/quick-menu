@@ -13,6 +13,7 @@ import org.lwjgl.glfw.GLFW
 import com.mojang.blaze3d.platform.InputConstants
 import xyz.inorganic.quickmenu.QuickMenu
 import xyz.inorganic.quickmenu.data.ActionButtonData
+import xyz.inorganic.quickmenu.macros.MacroExecutor
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
 import xyz.inorganic.quickmenu.other.ImportExportManager
 import xyz.inorganic.quickmenu.other.ModConfig
@@ -420,6 +421,18 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                 if (btn.isHovered) {
                     if (isDeleteDown) renderIndicator(graphics, btn, 0xFFFF0000.toInt(), "×")
                     else if (isMoveDown) renderIndicator(graphics, btn, 0xFF00AAFF.toInt(), "↔")
+                }
+            }
+        }
+
+        if (!editMode) {
+            buttonDataMap.forEach { (btn, data) ->
+                if (MacroExecutor.isRunning(data)) {
+                    val xSize = 8
+                    val xX = btn.x + btn.width - xSize + 1
+                    val xY = btn.y + btn.height - xSize + 1
+                    graphics.fill(xX, xY, xX + xSize, xY + xSize, 0xFF33AA33.toInt())
+                    graphics.text(font, "▶", xX + 1, xY, -1, false)
                 }
             }
         }

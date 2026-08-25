@@ -34,6 +34,9 @@ class ModConfig {
     var radialRadius: Int = 60
     var radialDeadZoneRadius: Int = 15
     var radialCloseOnAction: Boolean = true
+    var macroMaxStepsPerTick: Int = 10000
+    var macroMaxRunSeconds: Int = 10
+    var macroMaxNesting: Int = 16
 
     fun buttonsPerRow(): Int = buttonsPerRow
     fun visibleRows(): Int = visibleRows

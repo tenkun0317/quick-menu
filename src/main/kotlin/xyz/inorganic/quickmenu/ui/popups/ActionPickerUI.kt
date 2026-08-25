@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.data.command_actions.ActionData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
+import xyz.inorganic.quickmenu.data.command_actions.MacroActionData
 import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
 import java.util.function.Consumer
 
@@ -42,6 +43,12 @@ class ActionPickerUI : Screen(Component.translatable("menu.action_picker.title")
             onClose()
         }.pos(menuX + 10, startY + 50).size(160, 20).build()
         addRenderableWidget(sleepBtn)
+
+        val macroBtn = Button.builder(Component.translatable("menu.action_picker.macro")) {
+            onSelectedAction.accept(MacroActionData())
+            onClose()
+        }.pos(menuX + 10, startY + 75).size(160, 20).build()
+        addRenderableWidget(macroBtn)
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {

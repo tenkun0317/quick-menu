@@ -8,6 +8,7 @@
   "key.quickmenu.navigate_back": "Navigate Back",
   "key.quickmenu.close_search": "Close Search",
   "key.quickmenu.radial_open": "Open Radial Menu",
+  "key.quickmenu.macro_stop": "Stop All Macros",
 
 
   "menu.main.title": "Quick Menu",
@@ -35,15 +36,18 @@
   "menu.action_picker.command": "Command",
   "menu.action_picker.keybind": "Keybind",
   "menu.action_picker.sleep": "Sleep (Wait)",
+  "menu.action_picker.macro": "Macro",
 
   "text.action.run_feedback": "Ran action \"%s\"",
   "text.action.key": "Key: %s",
   "menu.main.button.config": "Config",
 
   "menu.action_picker.select": " > ",
+  "menu.keybind_picker.search": "Search keybinds...",
 
 
   "menu.editor.title": "Action Editor",
+  "menu.macro_editor.title": "Macro Editor",
   "menu.editor.button.finish": "Finish",
   "menu.editor.button.cancel": "Cancel",
   "menu.editor.actions": "Actions",
@@ -97,5 +101,9 @@
   "text.config.quickmenu.option.radialDisplayMode.value.dynamic": "Dynamic",
   "text.config.quickmenu.option.radialRadius": "Radius",
   "text.config.quickmenu.option.radialDeadZoneRadius": "Dead Zone Radius",
-  "text.config.quickmenu.option.radialCloseOnAction": "Close on Action"
+  "text.config.quickmenu.option.radialCloseOnAction": "Close on Action",
+  "text.config.quickmenu.section.macro": "Macro",
+  "text.config.quickmenu.option.macroMaxStepsPerTick": "Max Steps per Tick",
+  "text.config.quickmenu.option.macroMaxRunSeconds": "Max Run Time (seconds)",
+  "text.config.quickmenu.option.macroMaxNesting": "Max Macro Nesting Depth"
 }

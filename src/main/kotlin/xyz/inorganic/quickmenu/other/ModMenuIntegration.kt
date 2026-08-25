@@ -133,6 +133,36 @@ class ModMenuIntegration : ModMenuApi {
                     .binding(true, { config.radialCloseOnAction }, { config.radialCloseOnAction = it })
                     .build())
                 .build())
+            .category(ConfigCategory.createBuilder()
+                .name(Component.translatable("text.config.quickmenu.section.macro"))
+                .option(Option.createBuilder<Int>()
+                    .name(Component.translatable("text.config.quickmenu.option.macroMaxStepsPerTick"))
+                    .controller { opt ->
+                        IntegerFieldControllerBuilder.create(opt)
+                            .min(100)
+                            .max(1000000)
+                    }
+                    .binding(10000, { config.macroMaxStepsPerTick }, { config.macroMaxStepsPerTick = it })
+                    .build())
+                .option(Option.createBuilder<Int>()
+                    .name(Component.translatable("text.config.quickmenu.option.macroMaxRunSeconds"))
+                    .controller { opt ->
+                        IntegerFieldControllerBuilder.create(opt)
+                            .min(1)
+                            .max(300)
+                    }
+                    .binding(10, { config.macroMaxRunSeconds }, { config.macroMaxRunSeconds = it })
+                    .build())
+                .option(Option.createBuilder<Int>()
+                    .name(Component.translatable("text.config.quickmenu.option.macroMaxNesting"))
+                    .controller { opt ->
+                        IntegerFieldControllerBuilder.create(opt)
+                            .min(1)
+                            .max(100)
+                    }
+                    .binding(16, { config.macroMaxNesting }, { config.macroMaxNesting = it })
+                    .build())
+                .build())
             .build()
             .generateScreen(parent)
     }

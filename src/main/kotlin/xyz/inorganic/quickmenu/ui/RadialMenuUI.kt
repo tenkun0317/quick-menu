@@ -105,6 +105,7 @@ class RadialMenuUI : Screen(Component.translatable("menu.radial.title")) {
 
         if (dist < getDeadZoneRadius()) {
             hoveredAction = null
+            hoveredSlotIndex = -1
             return
         }
 
@@ -112,6 +113,7 @@ class RadialMenuUI : Screen(Component.translatable("menu.radial.title")) {
         val slots = getSlotCount()
         if (slots == 0) {
             hoveredAction = null
+            hoveredSlotIndex = -1
             return
         }
 

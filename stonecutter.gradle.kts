@@ -36,6 +36,7 @@ stonecutter parameters {
             replace("""minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.success", result.count))""", """minecraft?.player?.displayClientMessage(Component.translatable("menu.main.import.success", result.count), false)""")
             replace("""minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.failure", result.reason))""", """minecraft?.player?.displayClientMessage(Component.translatable("menu.main.import.failure", result.reason), false)""")
             replace("""client.player?.sendSystemMessage(Component.literal("Ran action \"${'$'}name\""))""", """client.player?.displayClientMessage(Component.literal("Ran action \"${'$'}name\""), false)""")
+            replace("""client.player?.sendSystemMessage(Component.literal("[QuickMenu] ${'$'}text"))""", """client.player?.displayClientMessage(Component.literal("[QuickMenu] ${'$'}text"), false)""")
         }
     }
 }

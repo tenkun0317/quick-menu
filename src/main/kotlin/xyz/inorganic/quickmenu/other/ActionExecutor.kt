@@ -3,7 +3,9 @@ package xyz.inorganic.quickmenu.other
 import xyz.inorganic.quickmenu.data.ActionButtonData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeyPressMode
+import xyz.inorganic.quickmenu.data.command_actions.MacroActionData
 import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
+import xyz.inorganic.quickmenu.macros.MacroExecutor
 
 object ActionExecutor {
     private class Execution(val button: ActionButtonData) {
@@ -44,6 +46,7 @@ object ActionExecutor {
     }
 
     fun cancel(button: ActionButtonData) {
+        MacroExecutor.stop(button)
         val removed = executions.filter { it.button === button }
         executions.removeAll { it.button === button }
         removed.forEach { releaseHeld(it) }
@@ -52,7 +55,7 @@ object ActionExecutor {
     fun cancelAll() {
         val removed = executions.toList()
         executions.clear()
-        removed.forEach { releaseHeld(it) }
+        removed.forEach { MacroExecutor.stop(it.button); releaseHeld(it) }
     }
 
     private fun releaseHeld(exec: Execution) {
@@ -73,6 +76,10 @@ object ActionExecutor {
                     return
                 }
             } else {
+                if (action is MacroActionData) {
+                    MacroExecutor.toggle(exec.button, action)
+                    continue
+                }
                 action.run()
                 if (action is KeybindActionData && action.mode == KeyPressMode.PRESS) {
                     exec.heldKeys.add(action.translationKey)

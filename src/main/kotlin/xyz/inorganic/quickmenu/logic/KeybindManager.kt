@@ -2,6 +2,7 @@ package xyz.inorganic.quickmenu.logic
 
 import net.minecraft.client.Minecraft
 import xyz.inorganic.quickmenu.mixins.KeyBindingMixin
+import xyz.inorganic.quickmenu.macros.MacroExecutor
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
 import xyz.inorganic.quickmenu.other.ActionExecutor
 import xyz.inorganic.quickmenu.other.KeybindHandler
@@ -12,13 +13,21 @@ import org.lwjgl.glfw.GLFW
 import com.mojang.blaze3d.platform.InputConstants
 
 object KeybindManager {
+    private val MODIFIER_KEY_CODES = setOf(
+        GLFW.GLFW_KEY_LEFT_CONTROL, GLFW.GLFW_KEY_RIGHT_CONTROL,
+        GLFW.GLFW_KEY_LEFT_SHIFT, GLFW.GLFW_KEY_RIGHT_SHIFT,
+        GLFW.GLFW_KEY_LEFT_ALT, GLFW.GLFW_KEY_RIGHT_ALT
+    )
+
     private var menuKeyPressed = false
     private var radialKeyPressed = false
+    private var macroStopKeyPressed = false
     private var radialHoveredAction: xyz.inorganic.quickmenu.data.ActionButtonData? = null
 
     fun onClientTick(client: Minecraft) {
         handleMenuKey(client)
         handleRadialKey(client)
+        handleMacroStopKey(client)
         
         if (client.gui.screen() == null) {
             handleActionKeys(client)
@@ -27,6 +36,8 @@ object KeybindManager {
         KeybindHandler.runQueue()
 
         ActionExecutor.advance()
+
+        MacroExecutor.advanceAll()
     }
 
     private fun handleMenuKey(client: Minecraft) {
@@ -35,12 +46,12 @@ object KeybindManager {
 
         if (isDown) {
             if (!menuKeyPressed) {
+                menuKeyPressed = true
                 if (client.gui.screen() is MainUI) {
                     client.gui.setScreen(null)
-                } else if (client.gui.screen() == null) {
+                } else if (client.gui.screen() == null && !isModifierHeld(rawKey, client)) {
                     client.gui.setScreen(MainUI())
                 }
-                menuKeyPressed = true
             }
         } else {
             menuKeyPressed = false
@@ -52,7 +63,7 @@ object KeybindManager {
         val isDown = InputConstants.isKeyDown(client.window, rawKey.value)
 
         if (isDown) {
-            if (!radialKeyPressed && client.gui.screen() == null) {
+            if (!radialKeyPressed && client.gui.screen() == null && !isModifierHeld(rawKey, client)) {
                 client.gui.setScreen(RadialMenuUI())
             }
             radialKeyPressed = true
@@ -63,6 +74,35 @@ object KeybindManager {
             }
             radialKeyPressed = false
         }
+    }
+
+    private fun handleMacroStopKey(client: Minecraft) {
+        val rawKey = (ModKeybindings.macroStopKeybinding as KeyBindingMixin).key
+        val isDown = InputConstants.isKeyDown(client.window, rawKey.value)
+
+        if (isDown && !macroStopKeyPressed) {
+            if (!isModifierHeld(rawKey, client)) {
+                MacroExecutor.emergencyStop()
+            }
+            macroStopKeyPressed = true
+        } else if (!isDown) {
+            macroStopKeyPressed = false
+        }
+    }
+
+    private fun isModifierHeld(boundKey: InputConstants.Key, client: Minecraft): Boolean {
+        if (boundKey.type == InputConstants.Type.KEYSYM &&
+            boundKey.value in MODIFIER_KEY_CODES
+        ) {
+            return false
+        }
+        val w = client.window
+        return InputConstants.isKeyDown(w, GLFW.GLFW_KEY_LEFT_CONTROL) ||
+            InputConstants.isKeyDown(w, GLFW.GLFW_KEY_RIGHT_CONTROL) ||
+            InputConstants.isKeyDown(w, GLFW.GLFW_KEY_LEFT_SHIFT) ||
+            InputConstants.isKeyDown(w, GLFW.GLFW_KEY_RIGHT_SHIFT) ||
+            InputConstants.isKeyDown(w, GLFW.GLFW_KEY_LEFT_ALT) ||
+            InputConstants.isKeyDown(w, GLFW.GLFW_KEY_RIGHT_ALT)
     }
 
     private fun handleActionKeys(client: Minecraft) {

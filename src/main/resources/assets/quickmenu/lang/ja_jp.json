@@ -8,6 +8,7 @@
   "key.quickmenu.navigate_back": "戻る",
   "key.quickmenu.close_search": "検索を閉じる",
   "key.quickmenu.radial_open": "ラジアルメニューを開く",
+  "key.quickmenu.macro_stop": "マクロをすべて停止",
 
 
   "menu.main.title": "Quick Menu",
@@ -35,15 +36,18 @@
   "menu.action_picker.command": "コマンド",
   "menu.action_picker.keybind": "キーバインド",
   "menu.action_picker.sleep": "待機 (Sleep)",
+  "menu.action_picker.macro": "マクロ",
 
   "text.action.run_feedback": "アクション「%s」を実行しました",
   "text.action.key": "キー: %s",
   "menu.main.button.config": "設定",
 
   "menu.action_picker.select": " > ",
+  "menu.keybind_picker.search": "キーバインドを検索...",
 
 
   "menu.editor.title": "アクションエディター",
+  "menu.macro_editor.title": "マクロ編集",
   "menu.editor.button.finish": "完了",
   "menu.editor.button.cancel": "キャンセル",
   "menu.editor.actions": "アクション",
@@ -98,5 +102,9 @@
   "text.config.quickmenu.option.radialDisplayMode.value.dynamic": "動的",
   "text.config.quickmenu.option.radialRadius": "半径",
   "text.config.quickmenu.option.radialDeadZoneRadius": "デッドゾーン半径",
-  "text.config.quickmenu.option.radialCloseOnAction": "実行時に閉じる"
+  "text.config.quickmenu.option.radialCloseOnAction": "実行時に閉じる",
+  "text.config.quickmenu.section.macro": "マクロ",
+  "text.config.quickmenu.option.macroMaxStepsPerTick": "1ティックあたりの最大ステップ数",
+  "text.config.quickmenu.option.macroMaxRunSeconds": "最大実行時間 (秒)",
+  "text.config.quickmenu.option.macroMaxNesting": "最大ネスト深さ"
 }

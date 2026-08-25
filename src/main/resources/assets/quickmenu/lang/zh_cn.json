@@ -8,6 +8,7 @@
   "key.quickmenu.navigate_back": "返回",
   "key.quickmenu.close_search": "关闭搜索",
   "key.quickmenu.radial_open": "打开径向菜单",
+  "key.quickmenu.macro_stop": "停止所有宏",
 
   
   "menu.main.title": "quickmenu",
@@ -35,15 +36,18 @@
   "menu.action_picker.command": "command",
   "menu.action_picker.keybind": "keybind",
   "menu.action_picker.sleep": "等待 (Sleep)",
+  "menu.action_picker.macro": "宏",
 
   "text.action.run_feedback": "已执行操作 \"%s\"",
   "text.action.key": "Key: %s",
   "menu.main.button.config": "配置",
 
   "menu.action_picker.select": " > ",
+  "menu.keybind_picker.search": "搜索按键...",
 
   
   "menu.editor.title": "操作编辑器",
+  "menu.macro_editor.title": "宏编辑器",
   "menu.editor.button.finish": "完成",
   "menu.editor.button.cancel": "取消",
   "menu.editor.actions": "操作",
@@ -98,5 +102,9 @@
   "text.config.quickmenu.option.radialDisplayMode.value.dynamic": "动态",
   "text.config.quickmenu.option.radialRadius": "半径",
   "text.config.quickmenu.option.radialDeadZoneRadius": "死区半径",
-  "text.config.quickmenu.option.radialCloseOnAction": "运行时关闭"
+  "text.config.quickmenu.option.radialCloseOnAction": "运行时关闭",
+  "text.config.quickmenu.section.macro": "宏",
+  "text.config.quickmenu.option.macroMaxStepsPerTick": "每游戏刻最大步数",
+  "text.config.quickmenu.option.macroMaxRunSeconds": "最大运行时间 (秒)",
+  "text.config.quickmenu.option.macroMaxNesting": "最大嵌套深度"
 }

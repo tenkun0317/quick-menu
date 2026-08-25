@@ -8,6 +8,7 @@
   "key.quickmenu.navigate_back": "返回",
   "key.quickmenu.close_search": "關閉搜尋",
   "key.quickmenu.radial_open": "開啟放射式選單",
+  "key.quickmenu.macro_stop": "停止所有巨集",
 
   
   "menu.main.title": "quickmenu",
@@ -35,15 +36,18 @@
   "menu.action_picker.command": "command",
   "menu.action_picker.keybind": "keybind",
   "menu.action_picker.sleep": "等待 (Sleep)",
+  "menu.action_picker.macro": "巨集",
 
   "text.action.run_feedback": "已執行操作 \"%s\"",
   "text.action.key": "Key: %s",
   "menu.main.button.config": "設定",
 
   "menu.action_picker.select": " > ",
+  "menu.keybind_picker.search": "搜尋按鍵...",
 
   
   "menu.editor.title": "操作編輯器",
+  "menu.macro_editor.title": "巨集編輯器",
   "menu.editor.button.finish": "完成",
   "menu.editor.button.cancel": "取消",
   "menu.editor.actions": "操作",
@@ -98,5 +102,9 @@
   "text.config.quickmenu.option.radialDisplayMode.value.dynamic": "動態",
   "text.config.quickmenu.option.radialRadius": "半徑",
   "text.config.quickmenu.option.radialDeadZoneRadius": "死區半徑",
-  "text.config.quickmenu.option.radialCloseOnAction": "執行時關閉"
+  "text.config.quickmenu.option.radialCloseOnAction": "執行時關閉",
+  "text.config.quickmenu.section.macro": "巨集",
+  "text.config.quickmenu.option.macroMaxStepsPerTick": "每遊戲刻最大步數",
+  "text.config.quickmenu.option.macroMaxRunSeconds": "最大執行時間 (秒)",
+  "text.config.quickmenu.option.macroMaxNesting": "最大巢狀深度"
 }

@@ -9,7 +9,9 @@ import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.data.ActionButtonData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
+import xyz.inorganic.quickmenu.data.command_actions.MacroActionData
 import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
+import xyz.inorganic.quickmenu.macros.MacroParser
 import xyz.inorganic.quickmenu.ui.popups.ActionPickerUI
 import xyz.inorganic.quickmenu.ui.popups.KeybindPickerUI
 import kotlin.math.ceil
@@ -86,6 +88,16 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
                         actionButtonData.actions[index] = SleepActionData.fromSecondsText(it)
                     }
                     addRenderableWidget(sleepBox)
+                } else if (action is MacroActionData) {
+                    val macroBtn = Button.builder(Component.literal("Macro: ${MacroParser.previewLine(action.script)}")) {
+                        val editor = TextMacroEditorUI(action.script) { newScript ->
+                            actionButtonData.actions[index] = MacroActionData(newScript)
+                            init()
+                        }
+                        editor.previousScreen = this@ActionListEditorUI
+                        minecraft?.gui?.setScreen(editor)
+                    }.pos(menuX + 10, rowY).size(190, 20).build()
+                    addRenderableWidget(macroBtn)
                 }
 
                 val canMoveUp = index > 0

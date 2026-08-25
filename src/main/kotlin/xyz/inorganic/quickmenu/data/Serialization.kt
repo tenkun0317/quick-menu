@@ -8,6 +8,7 @@ import xyz.inorganic.quickmenu.data.command_actions.ActionData
 import xyz.inorganic.quickmenu.data.command_actions.CommandActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeybindActionData
 import xyz.inorganic.quickmenu.data.command_actions.KeyPressMode
+import xyz.inorganic.quickmenu.data.command_actions.MacroActionData
 import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
 
 @Serializable
@@ -38,6 +39,7 @@ data class ActionButtonDataJSON(
                 "cmd" -> CommandActionData(value)
                 "key" -> KeybindActionData(value, KeyPressMode.fromId(actionList.getOrNull(2)))
                 "sleep" -> SleepActionData(value.toIntOrNull() ?: 0)
+                "macro" -> MacroActionData(value)
                 else -> null
             }
         }.toMutableList()

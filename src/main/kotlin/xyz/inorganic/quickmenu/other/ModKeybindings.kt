@@ -15,6 +15,7 @@ object ModKeybindings {
     lateinit var navigateBackKeybind: KeyMapping
     lateinit var closeSearchKeybind: KeyMapping
     lateinit var radialOpenKeybinding: KeyMapping
+    lateinit var macroStopKeybinding: KeyMapping
 
     fun initialize() {
         val mainCategory = KeyMapping.Category(
@@ -89,6 +90,15 @@ object ModKeybindings {
                 "key.quickmenu.radial_open",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_R,
+                mainCategory
+            )
+        )
+
+        macroStopKeybinding = KeyMappingHelper.registerKeyMapping(
+            KeyMapping(
+                "key.quickmenu.macro_stop",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_K,
                 mainCategory
             )
         )
