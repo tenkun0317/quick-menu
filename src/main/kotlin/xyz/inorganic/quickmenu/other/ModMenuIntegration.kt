@@ -45,10 +45,13 @@ class ModMenuIntegration : ModMenuApi {
                     }
                     .binding(2, { config.visibleRows }, { config.visibleRows = it })
                     .build())
-                .option(Option.createBuilder<Boolean>()
-                    .name(Component.translatable("text.config.quickmenu.option.closeOnKeyReleased"))
-                    .controller { BooleanControllerBuilder.create(it) }
-                    .binding(false, { config.closeOnKeyReleased }, { config.closeOnKeyReleased = it })
+                .option(Option.createBuilder<ModConfig.MenuOpenMode>()
+                    .name(Component.translatable("text.config.quickmenu.option.menuOpenMode"))
+                    .controller { opt ->
+                        EnumControllerBuilder.create(opt)
+                            .enumClass(ModConfig.MenuOpenMode::class.java)
+                    }
+                    .binding(ModConfig.MenuOpenMode.TOGGLE, { config.menuOpenMode }, { config.menuOpenMode = it })
                     .build())
                 .option(Option.createBuilder<Boolean>()
                     .name(Component.translatable("text.config.quickmenu.option.hideEditIcon"))

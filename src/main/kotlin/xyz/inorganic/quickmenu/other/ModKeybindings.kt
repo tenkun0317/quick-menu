@@ -8,99 +8,42 @@ import org.lwjgl.glfw.GLFW
 
 object ModKeybindings {
     lateinit var menuOpenKeybinding: KeyMapping
+        private set
     lateinit var moveModifierKeybind: KeyMapping
+        private set
     lateinit var deleteModifierKeybind: KeyMapping
+        private set
     lateinit var searchKeybind: KeyMapping
+        private set
     lateinit var editModeKeybind: KeyMapping
+        private set
     lateinit var navigateBackKeybind: KeyMapping
+        private set
     lateinit var closeSearchKeybind: KeyMapping
+        private set
     lateinit var radialOpenKeybinding: KeyMapping
+        private set
     lateinit var macroStopKeybinding: KeyMapping
+        private set
 
     fun initialize() {
         val mainCategory = KeyMapping.Category(
             Identifier.fromNamespaceAndPath("quickmenu", "main")
         )
 
-        menuOpenKeybinding = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.open",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_G,
-                mainCategory
+        fun register(name: String, defaultKey: Int): KeyMapping =
+            KeyMappingHelper.registerKeyMapping(
+                KeyMapping(name, InputConstants.Type.KEYSYM, defaultKey, mainCategory)
             )
-        )
 
-        moveModifierKeybind = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.move_modifier",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_LEFT_CONTROL,
-                mainCategory
-            )
-        )
-
-        deleteModifierKeybind = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.delete_modifier",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_LEFT_SHIFT,
-                mainCategory
-            )
-        )
-
-        searchKeybind = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.search",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_F,
-                mainCategory
-            )
-        )
-
-        editModeKeybind = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.edit_mode",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_E,
-                mainCategory
-            )
-        )
-
-        navigateBackKeybind = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.navigate_back",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_BACKSPACE,
-                mainCategory
-            )
-        )
-
-        closeSearchKeybind = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.close_search",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_ESCAPE,
-                mainCategory
-            )
-        )
-
-        radialOpenKeybinding = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.radial_open",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_R,
-                mainCategory
-            )
-        )
-
-        macroStopKeybinding = KeyMappingHelper.registerKeyMapping(
-            KeyMapping(
-                "key.quickmenu.macro_stop",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_K,
-                mainCategory
-            )
-        )
+        menuOpenKeybinding = register("key.quickmenu.open", GLFW.GLFW_KEY_G)
+        moveModifierKeybind = register("key.quickmenu.move_modifier", GLFW.GLFW_KEY_LEFT_CONTROL)
+        deleteModifierKeybind = register("key.quickmenu.delete_modifier", GLFW.GLFW_KEY_LEFT_SHIFT)
+        searchKeybind = register("key.quickmenu.search", GLFW.GLFW_KEY_F)
+        editModeKeybind = register("key.quickmenu.edit_mode", GLFW.GLFW_KEY_E)
+        navigateBackKeybind = register("key.quickmenu.navigate_back", GLFW.GLFW_KEY_BACKSPACE)
+        closeSearchKeybind = register("key.quickmenu.close_search", GLFW.GLFW_KEY_ESCAPE)
+        radialOpenKeybinding = register("key.quickmenu.radial_open", GLFW.GLFW_KEY_R)
+        macroStopKeybinding = register("key.quickmenu.macro_stop", GLFW.GLFW_KEY_K)
     }
 }

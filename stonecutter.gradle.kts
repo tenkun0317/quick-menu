@@ -9,10 +9,31 @@ stonecutter parameters {
     swaps["minecraft"] = "\"${node.metadata.version}\";"
 
     replacements {
+        if (current.version == "26.3") {
+            string(true) {
+                replace("import org.lwjgl.glfw.GLFW", "import com.mojang.blaze3d.platform.InputConstants as GLFW")
+                replace("InputConstants.Type.KEYSYM", "InputConstants.Type.KEYBOARD")
+                replace("GLFW.GLFW_KEY_LEFT_CONTROL", "GLFW.KEY_LCONTROL")
+                replace("GLFW.GLFW_KEY_RIGHT_CONTROL", "GLFW.KEY_RCONTROL")
+                replace("GLFW.GLFW_KEY_LEFT_SHIFT", "GLFW.KEY_LSHIFT")
+                replace("GLFW.GLFW_KEY_RIGHT_SHIFT", "GLFW.KEY_RSHIFT")
+                replace("GLFW.GLFW_KEY_LEFT_ALT", "GLFW.KEY_LALT")
+                replace("GLFW.GLFW_KEY_RIGHT_ALT", "GLFW.KEY_RALT")
+                replace("GLFW.GLFW_KEY_", "GLFW.KEY_")
+                replace("GLFW.GLFW_MOD_", "GLFW.MOD_")
+                replace("GLFW.GLFW_MOUSE_BUTTON_2", "GLFW.MOUSE_BUTTON_RIGHT")
+                replace("InputConstants.isKeyDown(client.window, ", "InputConstants.isKeyDown(")
+                replace("InputConstants.isKeyDown(window, ", "InputConstants.isKeyDown(")
+                replace("InputConstants.isKeyDown(w, ", "InputConstants.isKeyDown(")
+                replace("event.scancode()", "event.keycode()")
+                replace("return GLFW.glfwGetMouseButton(client.window.handle(), button) == GLFW.GLFW_PRESS", "return org.lwjgl.sdl.SDLMouse.SDL_GetMouseState(null, null) and (1 shl (toNativeMouseButton(button) - 1)) != 0")
+                replace("private const val SDL_INPUT = false", "private const val SDL_INPUT = true")
+            }
+        }
         string(current.version == "26.1" || current.version == "1.21.11") {
             replace("?.gui?.setScreen(", "?.setScreen(")
             replace(".gui.setScreen(", ".setScreen(")
-            replace(".gui.screen()", ".screen")
+            replace("client.gui.screen()", "client.screen")
         }
         string(current.version == "1.21.11") {
             replace("net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper", "net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper")

@@ -1,10 +1,12 @@
 package xyz.inorganic.quickmenu.ui
 
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.components.Checkbox
+import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
@@ -14,7 +16,9 @@ import net.minecraft.world.item.ItemStack
 import com.mojang.blaze3d.platform.InputConstants
 import org.lwjgl.glfw.GLFW
 import xyz.inorganic.quickmenu.data.ActionButtonData
+import xyz.inorganic.quickmenu.data.ActionKeyCodes
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
+import xyz.inorganic.quickmenu.other.KeybindConflicts
 import xyz.inorganic.quickmenu.ui.components.ConfirmScreen
 import xyz.inorganic.quickmenu.ui.components.QuickMenuButton
 import xyz.inorganic.quickmenu.ui.popups.ItemPickerUI
@@ -142,20 +146,39 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
     }
 
     private fun updateKeybindLabel() {
-        var msg = if (!isBoundKeybind) "Not Bound" else {
-            if (keybind[3] == 0) {
-                val base = InputConstants.Type.KEYSYM.getOrCreate(keybind[0]).displayName.string
+        var conflict = false
+        var msg: Component = Component.translatable("menu.editor.not_bound")
+        if (isBoundKeybind) {
+            msg = if (keybind[3] == 0) {
+                val base = InputConstants.Type.KEYSYM.getOrCreate(ActionKeyCodes.toNativeKey(keybind[0])).displayName.string
                 val mods = keybind[2]
                 val sb = StringBuilder()
-                if (mods and GLFW.GLFW_MOD_CONTROL != 0) sb.append("Ctrl+")
-                if (mods and GLFW.GLFW_MOD_SHIFT != 0) sb.append("Shift+")
-                if (mods and GLFW.GLFW_MOD_ALT != 0) sb.append("Alt+")
+                if (mods and ActionKeyCodes.MOD_CONTROL != 0) sb.append("Ctrl+")
+                if (mods and ActionKeyCodes.MOD_SHIFT != 0) sb.append("Shift+")
+                if (mods and ActionKeyCodes.MOD_ALT != 0) sb.append("Alt+")
                 sb.append(base)
-                sb.toString()
-            } else "Mouse ${keybind[0]}"
+                Component.literal(sb.toString())
+            } else {
+                Component.translatable("text.quickmenu.mouse_button", keybind[0] + 1)
+            }
+            conflict = KeybindConflicts.conflictingKeybinds(exclude = originalAction).contains(keybind.toList())
         }
-        if (settingKeybind) msg = "> $msg <"
-        keybindBtn.message = Component.literal(msg)
+        if (settingKeybind) {
+            msg = Component.literal("> ${msg.string} <")
+        }
+        msg = msg.copy().withStyle(
+            when {
+                conflict -> ChatFormatting.RED
+                !isBoundKeybind -> ChatFormatting.GRAY
+                else -> ChatFormatting.WHITE
+            }
+        )
+        keybindBtn.message = msg
+        if (conflict) {
+            keybindBtn.setTooltip(Tooltip.create(Component.translatable("text.quickmenu.keybind_conflict")))
+        } else {
+            keybindBtn.setTooltip(null)
+        }
     }
 
     private fun getReadableKeyName(translationKey: String): String {
@@ -229,7 +252,7 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
                     event.key() != GLFW.GLFW_KEY_LEFT_SHIFT && event.key() != GLFW.GLFW_KEY_RIGHT_SHIFT &&
                     event.key() != GLFW.GLFW_KEY_LEFT_ALT && event.key() != GLFW.GLFW_KEY_RIGHT_ALT) {
                     isBoundKeybind = true
-                    keybind.apply { clear(); add(event.key()); add(event.scancode()); add(event.modifiers()); add(0) }
+                    keybind.apply { clear(); add(ActionKeyCodes.toStoredKey(event.key())); add(event.scancode()); add(ActionKeyCodes.toStoredModifiers(event.modifiers())); add(0) }
                     settingKeybind = false
                     updateKeybindLabel()
                 }
@@ -245,9 +268,10 @@ class ActionEditorUI(private val originalAction: ActionButtonData? = null) : Scr
 
     override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
         if (settingKeybind) {
-            if (event.button() <= 2) {
+            val stored = ActionKeyCodes.toStoredMouseButton(event.button())
+            if (stored >= 0) {
                 isBoundKeybind = true
-                keybind.apply { clear(); add(event.button()); add(0); add(0); add(1) }
+                keybind.apply { clear(); add(stored); add(0); add(0); add(1) }
             }
             settingKeybind = false
             updateKeybindLabel()

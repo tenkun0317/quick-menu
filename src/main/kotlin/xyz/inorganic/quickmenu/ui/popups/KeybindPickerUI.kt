@@ -7,6 +7,7 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.network.chat.Component
 import xyz.inorganic.quickmenu.other.KeybindHandler
+import xyz.inorganic.quickmenu.ui.components.MenuScrollHandler
 import java.util.function.Consumer
 
 class KeybindPickerUI : Screen(Component.empty()) {
@@ -27,7 +28,6 @@ class KeybindPickerUI : Screen(Component.empty()) {
     }
 
     private var rows: List<Row> = emptyList()
-    private var scrollOffset = 0
 
     private var listTop = 0
     private var listBottom = 0
@@ -36,9 +36,14 @@ class KeybindPickerUI : Screen(Component.empty()) {
     private var scrollbarX = 0
     private var thumbHeight = 0
     private var thumbY = 0
-    private var draggingScrollbar = false
     private var dragStartMouseY = 0.0
     private var dragStartScroll = 0
+
+    private val scrollHandler = MenuScrollHandler(
+        rowHeight = ROW_HEIGHT,
+        getTotalHeight = { rows.size * ROW_HEIGHT },
+        getVisibleHeight = { listBottom - listTop }
+    )
 
     companion object {
         private const val ROW_HEIGHT = 22
@@ -74,7 +79,7 @@ class KeybindPickerUI : Screen(Component.empty()) {
 
     private fun listHeight(): Int = listBottom - listTop
 
-    private fun maxScroll(): Int = maxOf(0, rows.size * ROW_HEIGHT - listHeight())
+    private fun maxScroll(): Int = scrollHandler.maxScroll
 
     private fun rebuildRows() {
         val bindings = KeybindHandler.getKeybindings() ?: emptyArray()
@@ -101,28 +106,17 @@ class KeybindPickerUI : Screen(Component.empty()) {
             }
         }
 
-        scrollOffset = scrollOffset.coerceIn(0, maxScroll())
+        scrollHandler.setScroll(scrollHandler.scrollOffset)
         updateThumb()
     }
 
     private fun updateThumb() {
-        val maxScroll = maxScroll()
-        thumbHeight = if (maxScroll <= 0 || rows.isEmpty()) {
-            listHeight()
-        } else {
-            maxOf(24, listHeight() * listHeight() / (rows.size * ROW_HEIGHT))
-        }
-        val travel = listHeight() - thumbHeight
-        thumbY = if (maxScroll <= 0 || travel <= 0) {
-            listTop
-        } else {
-            listTop + travel * scrollOffset / maxScroll
-        }
+        thumbHeight = scrollHandler.thumbHeight(listHeight())
+        thumbY = scrollHandler.thumbY(listTop, listHeight())
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
-        val maxScroll = maxScroll()
-        scrollOffset = (scrollOffset - (verticalAmount * ROW_HEIGHT).toInt()).coerceIn(0, maxScroll)
+        scrollHandler.scroll(verticalAmount)
         updateThumb()
         return true
     }
@@ -136,22 +130,20 @@ class KeybindPickerUI : Screen(Component.empty()) {
             my >= listTop && my <= listBottom
         ) {
             if (my >= thumbY && my <= thumbY + thumbHeight) {
-                draggingScrollbar = true
-                dragStartMouseY = my
-                dragStartScroll = scrollOffset
+                scrollHandler.startDragging()
             } else {
                 val ratio = (my - listTop - thumbHeight / 2.0) / (listHeight() - thumbHeight).coerceAtLeast(1)
-                scrollOffset = (ratio * maxScroll()).toInt().coerceIn(0, maxScroll())
+                scrollHandler.setScroll((ratio * maxScroll()).toInt())
                 updateThumb()
-                draggingScrollbar = true
-                dragStartMouseY = my
-                dragStartScroll = scrollOffset
+                scrollHandler.startDragging()
             }
+            dragStartMouseY = my
+            dragStartScroll = scrollHandler.scrollOffset
             return true
         }
 
         if (mx >= listLeft && mx <= entryRight && my >= listTop && my <= listBottom) {
-            val index = (my - listTop + scrollOffset).toInt() / ROW_HEIGHT
+            val index = (my - listTop + scrollHandler.scrollOffset).toInt() / ROW_HEIGHT
             if (index in rows.indices) {
                 val row = rows[index]
                 if (row is Row.Entry) {
@@ -165,11 +157,11 @@ class KeybindPickerUI : Screen(Component.empty()) {
     }
 
     override fun mouseDragged(event: MouseButtonEvent, dragX: Double, dragY: Double): Boolean {
-        if (draggingScrollbar) {
+        if (scrollHandler.isDraggingScrollbar) {
             val maxScroll = maxScroll()
             val travel = (listHeight() - thumbHeight).coerceAtLeast(1)
             val delta = (event.y() - dragStartMouseY) / travel * maxScroll
-            scrollOffset = (dragStartScroll + delta).toInt().coerceIn(0, maxScroll)
+            scrollHandler.setScroll(dragStartScroll + delta.toInt())
             updateThumb()
             return true
         }
@@ -177,7 +169,7 @@ class KeybindPickerUI : Screen(Component.empty()) {
     }
 
     override fun mouseReleased(event: MouseButtonEvent): Boolean {
-        draggingScrollbar = false
+        scrollHandler.stopDragging()
         return super.mouseReleased(event)
     }
 
@@ -189,7 +181,7 @@ class KeybindPickerUI : Screen(Component.empty()) {
         super.extractRenderState(graphics, mouseX, mouseY, delta)
 
         graphics.enableScissor(listLeft, listTop, entryRight, listBottom)
-        var y = listTop - scrollOffset
+        var y = listTop - scrollHandler.scrollOffset
         for (row in rows) {
             if (y + ROW_HEIGHT >= listTop && y <= listBottom) {
                 when (row) {
@@ -201,11 +193,11 @@ class KeybindPickerUI : Screen(Component.empty()) {
         }
         graphics.disableScissor()
 
-        if (maxScroll() > 0) {
+        if (scrollHandler.hasScrollbar()) {
             graphics.fill(scrollbarX, listTop, scrollbarX + SCROLLBAR_WIDTH, listBottom, 0x22888888.toInt())
             val hoveredThumb = mouseX >= scrollbarX && mouseX <= scrollbarX + SCROLLBAR_WIDTH &&
                 mouseY >= thumbY && mouseY <= thumbY + thumbHeight
-            val thumbColor = if (draggingScrollbar || hoveredThumb) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
+            val thumbColor = if (scrollHandler.isDraggingScrollbar || hoveredThumb) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
             graphics.fill(scrollbarX, thumbY, scrollbarX + SCROLLBAR_WIDTH, thumbY + thumbHeight, thumbColor)
         }
     }

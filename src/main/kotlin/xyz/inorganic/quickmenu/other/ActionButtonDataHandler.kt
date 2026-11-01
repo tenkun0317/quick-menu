@@ -3,6 +3,7 @@ package xyz.inorganic.quickmenu.other
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.fabricmc.loader.api.FabricLoader
+import xyz.inorganic.quickmenu.QuickMenu
 import xyz.inorganic.quickmenu.data.*
 import java.io.File
 
@@ -40,7 +41,7 @@ object ActionButtonDataHandler {
                 actions.clear()
                 actions.addAll(jsonList.map { it.toActionButtonData() })
             } catch (e: Exception) {
-                e.printStackTrace()
+                QuickMenu.LOGGER.error("Failed to load action data", e)
             }
         }
     }
@@ -51,7 +52,7 @@ object ActionButtonDataHandler {
             val content = json.encodeToString(jsonList)
             configFile.writeText(content)
         } catch (e: Exception) {
-            e.printStackTrace()
+            QuickMenu.LOGGER.error("Failed to save action data", e)
         }
     }
 }

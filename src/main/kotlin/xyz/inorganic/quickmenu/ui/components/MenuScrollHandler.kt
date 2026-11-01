@@ -1,59 +1,68 @@
 package xyz.inorganic.quickmenu.ui.components
 
-import kotlin.math.ceil
-
 class MenuScrollHandler(
     private val rowHeight: Int,
-    private val visibleRows: () -> Int,
-    private val buttonsPerRow: () -> Int,
-    private val getTotalItems: () -> Int
+    private val getTotalHeight: () -> Int,
+    private val getVisibleHeight: () -> Int
 ) {
     var scrollOffset = 0
         private set
     var isDraggingScrollbar = false
         private set
 
-    private val totalRows: Int
-        get() = ceil(getTotalItems().toDouble() / buttonsPerRow().toDouble()).toInt()
+    private val visibleHeight: Int
+        get() = getVisibleHeight()
 
     val maxScroll: Int
-        get() = maxOf(0, (totalRows * rowHeight) - (visibleRows() * rowHeight))
+        get() = maxOf(0, getTotalHeight() - visibleHeight)
 
-    fun isMouseOverScrollbar(mouseX: Double, mouseY: Double, scrollbarX: Int, scrollbarY: Int, scrollbarWidth: Int = 4): Boolean {
-        if (totalRows <= visibleRows()) return false
-        return mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth && mouseY >= scrollbarY && mouseY <= scrollbarY + (visibleRows() * rowHeight)
+    fun hasScrollbar(): Boolean = maxScroll > 0
+
+    fun isMouseOverScrollbar(
+        mouseX: Double,
+        mouseY: Double,
+        scrollbarX: Int,
+        scrollbarY: Int,
+        scrollbarHeight: Int,
+        scrollbarWidth: Int = 4
+    ): Boolean {
+        if (!hasScrollbar()) return false
+        return mouseX >= scrollbarX && mouseX <= scrollbarX + scrollbarWidth &&
+            mouseY >= scrollbarY && mouseY <= scrollbarY + scrollbarHeight
     }
 
-    fun updateScrollFromMouse(mouseY: Double, scrollbarY: Int) {
-        val visibleH = visibleRows() * rowHeight
-        val percentage = ((mouseY - scrollbarY) / visibleH.toDouble()).coerceIn(0.0, 1.0)
-        scrollOffset = ((percentage * maxScroll).toInt() / rowHeight) * rowHeight
-        scrollOffset = scrollOffset.coerceIn(0, maxScroll)
+    fun updateScrollFromMouse(mouseY: Double, scrollbarY: Int, scrollbarHeight: Int) {
+        val percentage = ((mouseY - scrollbarY) / scrollbarHeight.toDouble()).coerceIn(0.0, 1.0)
+        setScroll((percentage * maxScroll).toInt())
     }
 
     fun scroll(verticalAmount: Double) {
-        scrollOffset = (scrollOffset - (verticalAmount * rowHeight).toInt()).coerceIn(0, maxScroll)
+        setScroll(scrollOffset - (verticalAmount * rowHeight).toInt())
     }
 
-    fun startDragging(mouseY: Double, scrollbarY: Int) {
+    fun setScroll(offset: Int) {
+        scrollOffset = offset.coerceIn(0, maxScroll)
+    }
+
+    fun startDragging() {
         isDraggingScrollbar = true
-        updateScrollFromMouse(mouseY, scrollbarY)
     }
 
     fun stopDragging() {
         isDraggingScrollbar = false
     }
 
-    fun getScrollbarThumbY(scrollbarY: Int, scrollbarHeight: Int): Int {
-        val thumbH = getScrollbarThumbHeight()
-        val maxS = maxScroll
-        return if (maxS > 0) scrollbarY + (scrollOffset.toDouble() / maxS.toDouble() * (scrollbarHeight - thumbH)).toInt() else scrollbarY
+    fun thumbHeight(scrollbarHeight: Int): Int {
+        val total = getTotalHeight()
+        if (total <= 0) return scrollbarHeight
+        return maxOf(4, (visibleHeight.toDouble() / total.toDouble() * scrollbarHeight).toInt())
     }
 
-    fun getScrollbarThumbHeight(): Int {
-        val totalRowsVal = totalRows
-        if (totalRowsVal <= visibleRows()) return 4
-        return maxOf(4, (visibleRows().toDouble() / totalRowsVal.toDouble() * (visibleRows() * rowHeight)).toInt())
+    fun thumbY(scrollbarY: Int, scrollbarHeight: Int): Int {
+        val thumbH = thumbHeight(scrollbarHeight)
+        val maxS = maxScroll
+        if (maxS <= 0) return scrollbarY
+        return scrollbarY + (scrollOffset.toDouble() / maxS.toDouble() * (scrollbarHeight - thumbH)).toInt()
     }
 
     fun reset() {

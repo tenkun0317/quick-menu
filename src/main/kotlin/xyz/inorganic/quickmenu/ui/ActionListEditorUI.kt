@@ -14,7 +14,7 @@ import xyz.inorganic.quickmenu.data.command_actions.SleepActionData
 import xyz.inorganic.quickmenu.macros.MacroParser
 import xyz.inorganic.quickmenu.ui.popups.ActionPickerUI
 import xyz.inorganic.quickmenu.ui.popups.KeybindPickerUI
-import kotlin.math.ceil
+import xyz.inorganic.quickmenu.ui.components.MenuScrollHandler
 
 class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Screen(Component.literal("Edit Actions")) {
     var previousScreen: ActionEditorUI? = null
@@ -24,9 +24,13 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
     private var menuWidth = 290
     private var menuHeight = 180
 
-    private var scrollOffset = 0
     private val actionRowHeight = 25
-    private var isDraggingScrollbar = false
+
+    private val scrollHandler = MenuScrollHandler(
+        rowHeight = actionRowHeight,
+        getTotalHeight = { (actionButtonData.actions.size + 1) * actionRowHeight },
+        getVisibleHeight = { menuHeight - 20 }
+    )
 
     override fun init() {
         menuX = (width - menuWidth) / 2
@@ -46,7 +50,7 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
         val maxVisibleHeight = menuHeight - 20
 
         actionButtonData.actions.forEachIndexed { index, action ->
-            val rowY = listStartY + index * actionRowHeight - scrollOffset
+            val rowY = listStartY + index * actionRowHeight - scrollHandler.scrollOffset
 
             if (rowY >= listStartY && rowY + 20 <= listStartY + maxVisibleHeight) {
                 if (action is CommandActionData) {
@@ -132,7 +136,7 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
             }
         }
 
-        val addActionY = listStartY + actionButtonData.actions.size * actionRowHeight - scrollOffset
+        val addActionY = listStartY + actionButtonData.actions.size * actionRowHeight - scrollHandler.scrollOffset
         if (addActionY >= listStartY && addActionY + 20 <= listStartY + maxVisibleHeight) {
             addRenderableWidget(Button.builder(Component.literal("+ Add Action")) {
                 val picker = ActionPickerUI()
@@ -147,28 +151,22 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
     }
 
     private fun isMouseOverScrollbar(mouseX: Double, mouseY: Double): Boolean {
-        val totalHeight = (actionButtonData.actions.size + 1) * actionRowHeight
-        if (totalHeight <= menuHeight - 20) return false
-        val sbX = menuX + menuWidth - 8
-        val sbY = menuY + 10
-        return mouseX >= sbX && mouseX <= sbX + 4 && mouseY >= sbY && mouseY <= sbY + (menuHeight - 20)
+        return scrollHandler.isMouseOverScrollbar(
+            mouseX, mouseY,
+            scrollbarX = menuX + menuWidth - 8,
+            scrollbarY = menuY + 10,
+            scrollbarHeight = menuHeight - 20
+        )
     }
 
     private fun updateScrollFromMouse(mouseY: Double) {
-        val totalHeight = (actionButtonData.actions.size + 1) * actionRowHeight
-        val visibleHeight = menuHeight - 20
-        val maxScroll = maxOf(0, totalHeight - visibleHeight)
-        val sbY = menuY + 10
-        val percentage = ((mouseY - sbY) / visibleHeight.toDouble()).coerceIn(0.0, 1.0)
-        scrollOffset = (percentage * maxScroll).toInt()
-        scrollOffset = (scrollOffset / actionRowHeight) * actionRowHeight
-        scrollOffset = scrollOffset.coerceIn(0, maxScroll)
+        scrollHandler.updateScrollFromMouse(mouseY, menuY + 10, menuHeight - 20)
         init()
     }
 
     override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
         if (isMouseOverScrollbar(event.x(), event.y())) {
-            isDraggingScrollbar = true
+            scrollHandler.startDragging()
             updateScrollFromMouse(event.y())
             return true
         }
@@ -176,7 +174,7 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
     }
 
     override fun mouseDragged(event: MouseButtonEvent, deltaX: Double, deltaY: Double): Boolean {
-        if (isDraggingScrollbar) {
+        if (scrollHandler.isDraggingScrollbar) {
             updateScrollFromMouse(event.y())
             return true
         }
@@ -184,14 +182,12 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
     }
 
     override fun mouseReleased(event: MouseButtonEvent): Boolean {
-        isDraggingScrollbar = false
+        scrollHandler.stopDragging()
         return super.mouseReleased(event)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
-        val totalHeight = (actionButtonData.actions.size + 1) * actionRowHeight
-        val maxScroll = maxOf(0, totalHeight - (menuHeight - 20))
-        scrollOffset = (scrollOffset - (verticalAmount * actionRowHeight).toInt()).coerceIn(0, maxScroll)
+        scrollHandler.scroll(verticalAmount)
         init()
         return true
     }
@@ -210,23 +206,21 @@ class ActionListEditorUI(private val actionButtonData: ActionButtonData) : Scree
 
         super.extractRenderState(graphics, mouseX, mouseY, delta)
 
-        val totalHeight = (actionButtonData.actions.size + 1) * actionRowHeight
         val visibleH = menuHeight - 20
-        if (totalHeight > visibleH) {
+        if (scrollHandler.hasScrollbar()) {
             val sbX = menuX + menuWidth - 6
             val sbY = menuY + 10
             graphics.fill(sbX, sbY, sbX + 3, sbY + visibleH, 0x22FFFFFF.toInt())
-            val thumbH = maxOf(4, (visibleH.toDouble() / totalHeight.toDouble() * visibleH).toInt())
-            val thumbY = sbY + (scrollOffset.toDouble() / (totalHeight - visibleH).toDouble() * (visibleH - thumbH)).toInt()
-            val thumbColor = if (isDraggingScrollbar || isMouseOverScrollbar(mouseX.toDouble(), mouseY.toDouble())) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
+            val thumbH = scrollHandler.thumbHeight(visibleH)
+            val thumbY = scrollHandler.thumbY(sbY, visibleH)
+            val thumbColor = if (scrollHandler.isDraggingScrollbar || isMouseOverScrollbar(mouseX.toDouble(), mouseY.toDouble())) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
             graphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbH, thumbColor)
         }
 
-        if (scrollOffset > 0) {
+        if (scrollHandler.scrollOffset > 0) {
             graphics.fillGradient(menuX + 1, menuY + 1, menuX + menuWidth - 1, menuY + 13, 0x99000000.toInt(), 0x00000000.toInt())
         }
-        val maxScroll = maxOf(0, totalHeight - visibleH)
-        if (scrollOffset < maxScroll) {
+        if (scrollHandler.scrollOffset < scrollHandler.maxScroll) {
             val fadeY = menuY + menuHeight - 1
             graphics.fillGradient(menuX + 1, fadeY - 12, menuX + menuWidth - 1, fadeY, 0x00000000.toInt(), 0x99000000.toInt())
         }

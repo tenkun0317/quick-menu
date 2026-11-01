@@ -3,6 +3,7 @@ package xyz.inorganic.quickmenu.other
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import net.fabricmc.loader.api.FabricLoader
+import xyz.inorganic.quickmenu.QuickMenu
 import java.io.File
 
 class ModConfig {
@@ -18,9 +19,13 @@ class ModConfig {
         STATIC, DYNAMIC
     }
 
+    enum class MenuOpenMode {
+        TOGGLE, HOLD
+    }
+
     var buttonsPerRow: Int = 5
     var visibleRows: Int = 2
-    var closeOnKeyReleased: Boolean = false
+    var menuOpenMode: MenuOpenMode = MenuOpenMode.TOGGLE
     var hideEditIcon: Boolean = false
     var closeOnAction: Boolean = true
     var showActionsInTooltip: Boolean = true
@@ -38,9 +43,11 @@ class ModConfig {
     var macroMaxRunSeconds: Int = 10
     var macroMaxNesting: Int = 16
 
+    val recentActions: MutableList<String> = mutableListOf()
+
     fun buttonsPerRow(): Int = buttonsPerRow
     fun visibleRows(): Int = visibleRows
-    fun closeOnKeyReleased(): Boolean = closeOnKeyReleased
+    fun menuOpenMode(): MenuOpenMode = menuOpenMode
     fun hideEditIcon(): Boolean = hideEditIcon
     fun closeOnAction(): Boolean = closeOnAction
     fun showActionsInTooltip(): Boolean = showActionsInTooltip
@@ -64,7 +71,7 @@ class ModConfig {
                 val config = GSON.fromJson(CONFIG_FILE.readText(), ModConfig::class.java)
                 config ?: ModConfig()
             } catch (e: Exception) {
-                e.printStackTrace()
+                QuickMenu.LOGGER.error("Failed to load config", e)
                 ModConfig()
             }
         }
@@ -74,7 +81,7 @@ class ModConfig {
         try {
             CONFIG_FILE.writeText(GSON.toJson(this))
         } catch (e: Exception) {
-            e.printStackTrace()
+            QuickMenu.LOGGER.error("Failed to save config", e)
         }
     }
 }

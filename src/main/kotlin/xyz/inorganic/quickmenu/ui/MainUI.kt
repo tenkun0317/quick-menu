@@ -13,15 +13,19 @@ import org.lwjgl.glfw.GLFW
 import com.mojang.blaze3d.platform.InputConstants
 import xyz.inorganic.quickmenu.QuickMenu
 import xyz.inorganic.quickmenu.data.ActionButtonData
+import xyz.inorganic.quickmenu.data.ActionKeyCodes
 import xyz.inorganic.quickmenu.macros.MacroExecutor
 import xyz.inorganic.quickmenu.other.ActionButtonDataHandler
 import xyz.inorganic.quickmenu.other.ImportExportManager
 import xyz.inorganic.quickmenu.other.ModConfig
 import xyz.inorganic.quickmenu.other.ModKeybindings
 import xyz.inorganic.quickmenu.other.ModMenuIntegration
+import xyz.inorganic.quickmenu.other.RecentActions
 import xyz.inorganic.quickmenu.ui.components.ImportConfirmScreen
+import xyz.inorganic.quickmenu.ui.components.MenuScrollHandler
 import xyz.inorganic.quickmenu.ui.components.QuickMenuButton
 import xyz.inorganic.quickmenu.ui.popups.BreadcrumbPopupUI
+import xyz.inorganic.quickmenu.ui.popups.KeybindOverviewUI
 import java.util.Collections
 import kotlin.math.ceil
 
@@ -33,14 +37,18 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     private var menuWidth = 0
     private var menuHeight = 0
 
-    private var scrollOffset = 0
     private val rowHeight = 30
 
     private lateinit var searchBox: EditBox
     private val buttonDataMap = mutableMapOf<QuickMenuButton, ActionButtonData>()
-    private var isDraggingScrollbar = false
     private var firstInit = true
     private var suppressNextChar = false
+
+    private val scrollHandler = MenuScrollHandler(
+        rowHeight = rowHeight,
+        getTotalHeight = { currentActionsTotalHeight() },
+        getVisibleHeight = { QuickMenu.CONFIG.visibleRows * rowHeight }
+    )
 
     override fun init() {
         val config = QuickMenu.CONFIG
@@ -65,7 +73,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             searchBox.isBordered = false
             searchBox.value = existingValue
             searchBox.setResponder {
-                scrollOffset = 0
+                scrollHandler.reset()
                 rebuildWidgets()
             }
             addRenderableWidget(searchBox)
@@ -89,12 +97,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             rebuildWidgets()
         }.pos(currentToggleX, toggleButtonsY).size(18, 18).build())
 
-        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
-            getFilteredActions(searchBox.value)
-        } else {
-            NavigationState.getCurrentChildren()
-        }
-
+        val actions = currentActions()
         val startX = menuX + 10
         val startY = menuY + 28
         val visibleAreaHeight = config.visibleRows * rowHeight
@@ -103,7 +106,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             val row = index / config.buttonsPerRow
             val col = index % config.buttonsPerRow
             val btnX = startX + col * 30
-            val btnY = startY + row * rowHeight - scrollOffset
+            val btnY = startY + row * rowHeight - scrollHandler.scrollOffset
 
             if (btnY >= startY && btnY + 26 <= startY + visibleAreaHeight) {
                 val button = QuickMenuButton(data.icon, { handleLeftClick(data) }, { handleRightClick(data) }, data.isFolder, data.registeredForRadial)
@@ -133,6 +136,12 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             addRenderableWidget(Button.builder(Component.translatable("menu.main.button.import")) {
                 handleImport()
             }.pos(menuX + menuWidth / 2 + 2, importExportY).size(menuWidth / 2 - 2, 20).build())
+
+            addRenderableWidget(Button.builder(Component.translatable("menu.main.button.keybinds")) {
+                val overview = KeybindOverviewUI()
+                overview.previousScreen = this
+                minecraft?.gui?.setScreen(overview)
+            }.pos(menuX, importExportY + 22).size(menuWidth, 20).build())
         }
     }
 
@@ -195,7 +204,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         when (val result = ImportExportManager.applyImport(raw, mode)) {
             is ImportExportManager.Result.Success -> {
                 NavigationState.navigateRoot()
-                scrollOffset = 0
+                scrollHandler.reset()
                 rebuildWidgets()
                 minecraft?.player?.sendSystemMessage(Component.translatable("menu.main.import.success", result.count))
             }
@@ -221,44 +230,58 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         return result
     }
 
+    private fun findActionByName(name: String): ActionButtonData? {
+        fun collect(actions: List<ActionButtonData>): ActionButtonData? {
+            for (action in actions) {
+                if (action.name == name) return action
+                if (action.isFolder) {
+                    collect(action.children)?.let { return it }
+                }
+            }
+            return null
+        }
+        return collect(ActionButtonDataHandler.actions)
+    }
+
+    private fun currentActions(): List<ActionButtonData> {
+        if (isSearching) {
+            val query = if (::searchBox.isInitialized) searchBox.value else ""
+            return if (query.isEmpty()) {
+                RecentActions.resolve().mapNotNull { findActionByName(it) }
+            } else {
+                getFilteredActions(query)
+            }
+        }
+        return NavigationState.getCurrentChildren()
+    }
+
+    private fun currentActionsTotalHeight(): Int {
+        val totalRows = ceil(currentActions().size.toDouble() / QuickMenu.CONFIG.buttonsPerRow.toDouble()).toInt()
+        return totalRows * rowHeight
+    }
+
     override fun rebuildWidgets() {
         clearWidgets()
         init()
     }
 
     private fun isMouseOverScrollbar(mouseX: Double, mouseY: Double): Boolean {
-        val config = QuickMenu.CONFIG
-        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
-            getFilteredActions(searchBox.value)
-        } else {
-            NavigationState.getCurrentChildren()
-        }
-        val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
-        if (totalRows <= config.visibleRows) return false
-        val sbX = menuX + menuWidth - 6
-        return mouseX >= sbX && mouseX <= sbX + 4 && mouseY >= menuY + 28 && mouseY <= menuY + 28 + (config.visibleRows * rowHeight)
+        return scrollHandler.isMouseOverScrollbar(
+            mouseX, mouseY,
+            scrollbarX = menuX + menuWidth - 6,
+            scrollbarY = menuY + 28,
+            scrollbarHeight = QuickMenu.CONFIG.visibleRows * rowHeight
+        )
     }
 
     private fun updateScrollFromMouse(mouseY: Double) {
-        val config = QuickMenu.CONFIG
-        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
-            getFilteredActions(searchBox.value)
-        } else {
-            NavigationState.getCurrentChildren()
-        }
-        val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
-        val visibleH = config.visibleRows * rowHeight
-        val maxScroll = maxOf(0, (totalRows * rowHeight) - visibleH)
-        val sbY = menuY + 28
-        val percentage = ((mouseY - sbY) / visibleH.toDouble()).coerceIn(0.0, 1.0)
-        scrollOffset = ((percentage * maxScroll).toInt() / rowHeight) * rowHeight
-        scrollOffset = scrollOffset.coerceIn(0, maxScroll)
+        scrollHandler.updateScrollFromMouse(mouseY, menuY + 28, QuickMenu.CONFIG.visibleRows * rowHeight)
         rebuildWidgets()
     }
 
     override fun mouseClicked(event: MouseButtonEvent, doubleClick: Boolean): Boolean {
         if (isMouseOverScrollbar(event.x(), event.y())) {
-            isDraggingScrollbar = true
+            scrollHandler.startDragging()
             updateScrollFromMouse(event.y())
             return true
         }
@@ -276,14 +299,14 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                         if (omitted.isNotEmpty()) {
                             minecraft?.gui?.setScreen(BreadcrumbPopupUI(omitted, {
                                 NavigationState.navigateToLevel(it)
-                                scrollOffset = 0
+                                scrollHandler.reset()
                                 rebuildWidgets()
                             }, this))
                         }
                         return true
                     } else {
                         NavigationState.navigateToLevel(level)
-                        scrollOffset = 0
+                        scrollHandler.reset()
                         rebuildWidgets()
                         return true
                     }
@@ -295,7 +318,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     override fun mouseDragged(event: MouseButtonEvent, deltaX: Double, deltaY: Double): Boolean {
-        if (isDraggingScrollbar) {
+        if (scrollHandler.isDraggingScrollbar) {
             updateScrollFromMouse(event.y())
             return true
         }
@@ -303,26 +326,12 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
     }
 
     override fun mouseReleased(event: MouseButtonEvent): Boolean {
-        isDraggingScrollbar = false
-        if (!editMode && QuickMenu.CONFIG.closeOnKeyReleased) {
-            if (ModKeybindings.menuOpenKeybinding.matchesMouse(event)) {
-                handleReleaseAction()
-                return true
-            }
-        }
+        scrollHandler.stopDragging()
         return super.mouseReleased(event)
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
-        val config = QuickMenu.CONFIG
-        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
-            getFilteredActions(searchBox.value)
-        } else {
-            NavigationState.getCurrentChildren()
-        }
-        val totalRows = ceil(actions.size.toDouble() / config.buttonsPerRow.toDouble()).toInt()
-        val maxScroll = maxOf(0, (totalRows * rowHeight) - (config.visibleRows * rowHeight))
-        scrollOffset = (scrollOffset - (verticalAmount * rowHeight).toInt()).coerceIn(0, maxScroll)
+        scrollHandler.scroll(verticalAmount)
         rebuildWidgets()
         return true
     }
@@ -335,12 +344,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
             if (key == InputConstants.UNKNOWN) return false
 
             if (key.type == InputConstants.Type.MOUSE) {
-                when (key.value) {
-                    0 -> client.mouseHandler.isLeftPressed
-                    1 -> client.mouseHandler.isRightPressed
-                    2 -> client.mouseHandler.isMiddlePressed
-                    else -> false
-                }
+                ActionKeyCodes.isMouseButtonDown(client, ActionKeyCodes.toStoredMouseButton(key.value))
             } else {
                 InputConstants.isKeyDown(window, key.value)
             }
@@ -354,12 +358,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         val key = keyBindingMixin.getKey()
         val client = Minecraft.getInstance()
         return if (key.type == InputConstants.Type.MOUSE) {
-            when (key.value) {
-                0 -> client.mouseHandler.isLeftPressed
-                1 -> client.mouseHandler.isRightPressed
-                2 -> client.mouseHandler.isMiddlePressed
-                else -> false
-            }
+            ActionKeyCodes.isMouseButtonDown(client, ActionKeyCodes.toStoredMouseButton(key.value))
         } else {
             InputConstants.isKeyDown(client.window, key.value)
         }
@@ -375,30 +374,22 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
 
         super.extractRenderState(graphics, mouseX, mouseY, delta)
 
-        val actions = if (isSearching && ::searchBox.isInitialized && searchBox.value.isNotEmpty()) {
-            getFilteredActions(searchBox.value)
-        } else {
-            NavigationState.getCurrentChildren()
-        }
-        val totalRows = ceil(actions.size.toDouble() / QuickMenu.CONFIG.buttonsPerRow.toDouble()).toInt()
-        if (totalRows > QuickMenu.CONFIG.visibleRows) {
+        val actions = currentActions()
+        if (scrollHandler.hasScrollbar()) {
             val sbX = menuX + menuWidth - 5
             val sbY = menuY + 28
             val sbH = QuickMenu.CONFIG.visibleRows * rowHeight
-            graphics.fill(sbX, sbY, sbX + 3, sbY + sbH, 0x22FFFFFF.toInt())
-            val thumbH = maxOf(4, (QuickMenu.CONFIG.visibleRows.toDouble() / totalRows.toDouble() * sbH).toInt())
-            val maxScroll = (totalRows - QuickMenu.CONFIG.visibleRows) * rowHeight
-            val thumbY = if (maxScroll > 0) sbY + (scrollOffset.toDouble() / maxScroll.toDouble() * (sbH - thumbH)).toInt() else sbY
-            val thumbColor = if (isDraggingScrollbar || isMouseOverScrollbar(mouseX.toDouble(), mouseY.toDouble())) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
+            val thumbH = scrollHandler.thumbHeight(sbH)
+            val thumbY = scrollHandler.thumbY(sbY, sbH)
+            val thumbColor = if (scrollHandler.isDraggingScrollbar || isMouseOverScrollbar(mouseX.toDouble(), mouseY.toDouble())) 0xAAFFFFFF.toInt() else 0x66FFFFFF.toInt()
             graphics.fill(sbX, thumbY, sbX + 3, thumbY + thumbH, thumbColor)
         }
 
         val contentStartY = menuY + 25
         val contentEndY = contentStartY + QuickMenu.CONFIG.visibleRows * rowHeight + 3
-        val maxScroll = maxOf(0, (totalRows - QuickMenu.CONFIG.visibleRows) * rowHeight)
 
-        if (scrollOffset > 0) graphics.fillGradient(menuX + 1, contentStartY, menuX + menuWidth - 1, contentStartY + 12, 0x99000000.toInt(), 0x00000000.toInt())
-        if (scrollOffset < maxScroll) graphics.fillGradient(menuX + 1, contentEndY - 12, menuX + menuWidth - 1, contentEndY, 0x00000000.toInt(), 0x99000000.toInt())
+        if (scrollHandler.scrollOffset > 0) graphics.fillGradient(menuX + 1, contentStartY, menuX + menuWidth - 1, contentStartY + 12, 0x99000000.toInt(), 0x00000000.toInt())
+        if (scrollHandler.scrollOffset < scrollHandler.maxScroll) graphics.fillGradient(menuX + 1, contentEndY - 12, menuX + menuWidth - 1, contentEndY, 0x00000000.toInt(), 0x99000000.toInt())
 
         if (!isSearching) {
             renderBreadcrumbs(graphics, mouseX, mouseY)
@@ -409,7 +400,12 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
 
         if (actions.isEmpty()) {
-            val emptyMsg = Component.translatable("menu.main.no_actions")
+            val emptyQuery = isSearching && (!::searchBox.isInitialized || searchBox.value.isEmpty())
+            val emptyMsg = if (emptyQuery) {
+                Component.translatable("menu.main.no_recent")
+            } else {
+                Component.translatable("menu.main.no_actions")
+            }
             graphics.centeredText(font, emptyMsg, menuX + menuWidth / 2, menuY + menuHeight / 2, 0x66FFFFFF.toInt())
         }
 
@@ -557,7 +553,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                         if (::searchBox.isInitialized) searchBox.value = ""
                     }
                     NavigationState.navigateTo(data)
-                    scrollOffset = 0
+                    scrollHandler.reset()
                     rebuildWidgets()
                 } else {
                     gotoActionEditor(data)
@@ -572,7 +568,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
                 if (::searchBox.isInitialized) searchBox.value = ""
             }
             NavigationState.navigateTo(data)
-            scrollOffset = 0
+            scrollHandler.reset()
             rebuildWidgets()
         } else {
             data.run()
@@ -637,15 +633,6 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         minecraft?.gui?.setScreen(actionEditor)
     }
 
-    private fun handleReleaseAction() {
-        val hoveredBtn = buttonDataMap.keys.find { it.isHovered }
-        hoveredBtn?.let { btn ->
-            val data = buttonDataMap[btn]
-            if (data != null && !data.isFolder) handleLeftClick(data)
-        }
-        minecraft?.gui?.setScreen(null)
-    }
-
     override fun keyPressed(event: KeyEvent): Boolean {
         if (ModKeybindings.searchKeybind.matches(event) && !isSearching) {
             isSearching = true
@@ -660,7 +647,7 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
         if (ModKeybindings.navigateBackKeybind.matches(event) && !NavigationState.isAtRoot() && !isSearching) {
             NavigationState.navigateBack()
-            scrollOffset = 0
+            scrollHandler.reset()
             rebuildWidgets()
             return true
         }
@@ -681,16 +668,6 @@ class MainUI : Screen(Component.translatable("menu.main.title")) {
         }
         suppressNextChar = false
         return super.charTyped(event)
-    }
-
-    override fun keyReleased(event: KeyEvent): Boolean {
-        if (!editMode && QuickMenu.CONFIG.closeOnKeyReleased) {
-            if (ModKeybindings.menuOpenKeybinding.matches(event)) {
-                handleReleaseAction()
-                return true
-            }
-        }
-        return super.keyReleased(event)
     }
 
     override fun isPauseScreen(): Boolean = false
